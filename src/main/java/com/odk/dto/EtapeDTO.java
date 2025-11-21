@@ -1,17 +1,22 @@
 package com.odk.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.odk.Entity.Activite;
 import com.odk.Entity.Critere;
+
+import com.odk.Entity.Etape;
+import com.odk.Entity.Liste;
 import com.odk.Entity.Utilisateur;
 import com.odk.Enum.Statut;
 import lombok.Data;
-
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EtapeDTO {
 
     private Long id;
@@ -21,17 +26,21 @@ public class EtapeDTO {
     private Date dateDebut;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dateFin;
-//    private ActiviteDTO activite;
-    private List<CritereDTO> critere;
-    private List<ParticipantDTO> listeDebut;
-    private List<ParticipantDTO> listeResultat;
-    private List<ListeDTO> liste;
+    private Activite activite;
+    private List<Critere> critere;
+    private List<Liste> listes; 
     private Utilisateur created_by;
 
 
-    public EtapeDTO() {
-        this.listeDebut = new ArrayList<>();
-        this.listeResultat = new ArrayList<>();
+ 
+    public EtapeDTO(Etape e) {
+        this.activite=e.getActivite();
+        this.created_by=e.getCreated_by();
+        this.critere=e.getCritere();
+        this.dateDebut=e.getDateDebut();
+        this.dateFin=e.getDateFin();
+        this.nom=e.getNom();
+        this.statut=e.getStatut();
     }
 
 }

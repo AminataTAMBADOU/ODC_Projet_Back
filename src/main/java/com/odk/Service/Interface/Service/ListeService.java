@@ -1,7 +1,6 @@
 package com.odk.Service.Interface.Service;
 
 import com.odk.Entity.Liste;
-import com.odk.Entity.Utilisateur;
 import com.odk.Repository.ListeRepository;
 import com.odk.Repository.ParticipantRepository;
 import com.odk.Service.Interface.CrudService;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -21,27 +19,29 @@ public class ListeService implements CrudService<Liste, Long> {
 
     private ListeRepository listeRepository;
     private ParticipantRepository participantRepository;
+    private final ListeMapper listeMapper;
 
     @Override
     public Liste add(Liste liste) {
         return null;
     }
 
-    public List<ListeDTO> getAllListes() {
-        return listeRepository.findAll().stream()
-                .map(ListeDTO::new)
-                .collect(Collectors.toList());
-    }
+
+public List<ListeDTO> getAllListes() {
+    return listeRepository.findAll().stream()
+            .map(listeMapper::toDto)
+            .toList();
+}
 
     public Optional<ListeDTO> getFindById(Long id) {
         return listeRepository.findById(id)
-                .map(ListeDTO::new); // Convertir en DTO
+                .map(listeMapper::toDto); // Convertir en DTO
     }
+
 
 
     @Override
     public List<Liste> List() {
-
         return listeRepository.findAll();
     }
 

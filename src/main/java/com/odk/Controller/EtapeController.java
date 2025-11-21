@@ -30,42 +30,51 @@ public class EtapeController {
     private UtilisateurRepository utilisateurRepository;
 
 
-    @PostMapping("/{id}")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<List<Etape>> addEtapes2(@PathVariable Long id, @RequestBody List<Etape> etapes) {
+//    @PostMapping("/{id}")
+//    @ResponseStatus(HttpStatus.CREATED)
+//    public ResponseEntity<List<Etape>> addEtapes2(@PathVariable Long id, @RequestBody List<Etape> etapes) {
+//    Utilisateur userCreated = utilisateurRepository.findById(id).orElse(null);
+//
+//        List<Etape> savedEtapes = etapes.stream()
+//        .peek(etape -> {
+//            etape.setCreated_by(userCreated); // Peut être null si non trouvé
+//            etape.mettreAJourStatut();       // Met à jour le statut avant sauvegarde
+//        })
+//        .map(etapeRepository::save)
+//        .collect(Collectors.toList());
+//
+//        return ResponseEntity.status(HttpStatus.CREATED).body(savedEtapes);
+//}
+
+//    @PostMapping
+//    @PreAuthorize("hasRole('PERSONNEL')")
+//    @ResponseStatus(HttpStatus.CREATED)
+//    public ResponseEntity<List<Etape>> addEtapes(@RequestBody List<Etape> etapes) {
+//        List<Etape> savedEtapes = etapes.stream()
+//                .map(etape -> {
+//                    etape.mettreAJourStatut(); // Mise à jour du statut avant sauvegarde
+//                    return etapeRepository.save(etape);
+//                })
+//                .collect(Collectors.toList());
+//        return ResponseEntity.ok(savedEtapes);
+//    }
+
+@PostMapping("/{id}")
+@PreAuthorize("hasRole('PERSONNEL')")
+@ResponseStatus(HttpStatus.CREATED)
+public ResponseEntity<EtapeDTO> create(@PathVariable Long id,@RequestBody EtapeDTO etapeDTO){
     Utilisateur userCreated = utilisateurRepository.findById(id).orElse(null);
-
-        List<Etape> savedEtapes = etapes.stream()
-        .peek(etape -> {
-            etape.setCreated_by(userCreated); // Peut être null si non trouvé
-            etape.mettreAJourStatut();       // Met à jour le statut avant sauvegarde
-        })
-        .map(etapeRepository::save)
-        .collect(Collectors.toList());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedEtapes);
+    etapeDTO.setCreated_by(userCreated);
+    return ResponseEntity.ok(etapeService.addDTO(etapeDTO));
+    
 }
-
-    @PostMapping
-    @PreAuthorize("hasRole('PERSONNEL')")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<List<Etape>> addEtapes(@RequestBody List<Etape> etapes) {
-        List<Etape> savedEtapes = etapes.stream()
-                .map(etape -> {
-                    etape.mettreAJourStatut(); // Mise à jour du statut avant sauvegarde
-                    return etapeRepository.save(etape);
-                })
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(savedEtapes);
-    }
-
-
+    
     @GetMapping
     @PreAuthorize("hasRole('PERSONNEL') or hasRole('SUPERADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<EtapeDTO>> getAllEtapes() {
         List<EtapeDTO> letap=etapeService.getAllEtapes();
-//        System.out.println("mes etapes==============="+ letap);
+       System.out.println("mes etapes==============="+ letap);
         return ResponseEntity.ok(letap); // Utilise le service pour récupérer les étapes sous forme de DTO
     }
 

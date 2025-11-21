@@ -12,8 +12,8 @@ public interface ActiviteMapper {
     ActiviteMapper INSTANCE = Mappers.getMapper(ActiviteMapper.class);
 
     // Convert Mission entity to DTO
-    @Mapping(source = "listeDebut", target = "listeDebut", ignore = true)
-    @Mapping(source = "listeResultat", target = "listeResultat")
+//    @Mapping(source = "listeDebut", target = "listeDebut", ignore = true)
+//    @Mapping(source = "listeResultat", target = "listeResultat")
     ActiviteDTO ACTIVITE_DTO(Activite activite);
 
     List<ActiviteDTO> listeActivite(List<Activite> activite);

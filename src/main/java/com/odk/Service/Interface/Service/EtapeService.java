@@ -14,7 +14,6 @@ import com.odk.dto.ParticipantDTO;
 import com.odk.helper.ExcelHelper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,7 +37,7 @@ public class EtapeService implements CrudService<Etape, Long> {
     private ActiviteParticipantRepository activiteParticipantRepository;
     private CritereRepository critereRepository;
     private ListeRepository listeRepository;
-
+private final EtapeMapper etapeMapper;
 
     private static final Logger logger = LoggerFactory.getLogger(EtapeService.class);
 
@@ -52,28 +51,29 @@ public class EtapeService implements CrudService<Etape, Long> {
         dto.setStatut(etape.getStatut());
 
         // Initialisation des listes si elles ne le sont pas déjà
-        dto.setListeDebut(new ArrayList<>());
-        dto.setListeResultat(new ArrayList<>());
+//        dto.setListeDebut(new ArrayList<>());
+//        dto.setListeResultat(new ArrayList<>());
         dto.setCreated_by(etape.getCreated_by());
 
         // Conversion des participants
-        if (etape.getListeDebut() != null) {
-            dto.setListeDebut(etape.getListeDebut().stream()
-                    .map(ParticipantDTO::new)
-                    .collect(Collectors.toList()));
-        }
+//        if (etape.getListeDebut() != null) {
+//            dto.setListeDebut(etape.getListeDebut().stream()
+//                    .map(ParticipantDTO::new)
+//                    .collect(Collectors.toList()));
+//        }
 
-        if (etape.getListeResultat() != null) {
-            dto.setListeResultat(etape.getListeResultat().stream()
-                    .map(ParticipantDTO::new)
-                    .collect(Collectors.toList()));
-        }
+//        if (etape.getListeResultat() != null) {
+//            dto.setListeResultat(etape.getListeResultat().stream()
+//                    .map(ParticipantDTO::new)
+//                    .collect(Collectors.toList()));
+//        }
 
         // Convertir les Critere en CritereDTO si nécessaire
         if (etape.getCritere() != null) {
-            dto.setCritere(etape.getCritere().stream()
-                    .map(this::convertToCritereDto) // Créez une méthode convertToCritereDto
-                    .collect(Collectors.toList()));
+            dto.setCritere(etape.getCritere());
+//            dto.setCritere(etape.getCritere().stream()
+//                    .map(this::convertToCritereDto) // Créez une méthode convertToCritereDto
+//                    .collect(Collectors.toList()));
         }
 
         return dto;
@@ -92,6 +92,15 @@ public class EtapeService implements CrudService<Etape, Long> {
     public Etape add(Etape etape) {
         etape.mettreAJourStatut();
          return etapeRepository.save(etape);
+    }
+   
+    @Transactional
+    public EtapeDTO addDTO(EtapeDTO etapeDTO) {
+        System.err.println("ajjout ===========etap"+etapeDTO.getCreated_by().getNom());
+        Etape etape=etapeMapper.toEntity(etapeDTO);
+        etape.mettreAJourStatut();
+        Etape saved = etapeRepository.save(etape);
+         return etapeMapper.toDto(saved);
     }
 
 
@@ -198,8 +207,7 @@ public class EtapeService implements CrudService<Etape, Long> {
 //                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Liste non trouvée pour cette étape"));
 
 
-        Set<Liste> listes = etape.getListe(); // Récupérer le Set de Listes
-
+        List<Liste> listes = etape.getListes(); // Récupérer le Set de Listes
         Liste listeAMettreAJour = null;
 
         if (toListeDebut) {
@@ -227,11 +235,11 @@ public class EtapeService implements CrudService<Etape, Long> {
                 participant.setListe(listeAMettreAJour);
             }
 
-            if (toListeDebut) {
-                etape.addParticipantsToListeDebut(participants);
-            } else {
-                etape.addParticipantsToListeResultat(participants);
-            }
+//            if (toListeDebut) {
+//                etape.addParticipantsToListeDebut(participants);
+//            } else {
+//                etape.addParticipantsToListeResultat(participants);
+//            }
 
             listeRepository.save(listeAMettreAJour); // Enregistrer la Liste mise à jour
             etapeRepository.save(etape); // Enregistrer l'Etape (se propage en cascade)
@@ -245,7 +253,7 @@ public class EtapeService implements CrudService<Etape, Long> {
 
 
     public List<EtapeDTO> getEtapeDTO(Long id) {
-        return EtapeMapper.INSTANCE.listeEtape(etapeRepository.findEtapeById(id));
+        return etapeMapper.INSTANCE.listeEtape(etapeRepository.findEtapeById(id));
     }
 
     public boolean isEtapeModifiable(Long etapeId) {

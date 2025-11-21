@@ -21,19 +21,27 @@ public class Etape {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nom;
-
     @ManyToOne
     @JoinColumn(name = "activite_id")
-    @JsonBackReference
     private Activite activite;
 
-    @OneToMany(mappedBy = "etapeDebut", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JsonManagedReference("etapeDebutRef")
-    private List<Participant> listeDebut = new ArrayList<>();
+    @JsonIgnore
+    @OneToMany(mappedBy = "etape", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Liste> listes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "etapeResultat", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("etapeResultatRef")
-    private List<Participant> listeResultat = new ArrayList<>();
+//    @ManyToOne
+//    @JoinColumn(name = "activite_id")
+//    @JsonManagedReference
+//    @JsonIgnore
+//     private Activite activite;
+
+//  @OneToMany(mappedBy = "etapeDebut", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+//  @JsonManagedReference("etapeDebutRef")
+// private List<Participant> listeDebut = new ArrayList<>();
+//
+// @OneToMany(mappedBy = "etapeResultat", cascade = CascadeType.ALL, orphanRemoval = true)
+//@JsonManagedReference("etapeResultatRef")
+//  private List<Participant> listeResultat = new ArrayList<>();
     
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dateDebut;
@@ -43,29 +51,29 @@ public class Etape {
     
     private Statut statut;
 
-    @OneToMany(mappedBy = "etape", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("listeRef")
-//    @JsonManagedReference("etape-liste")  // Doit correspondre à `@JsonBackReference`
-    private Set<Liste> liste = new HashSet<>();
+//    @OneToMany(mappedBy = "etape", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @JsonManagedReference("listeRef")
+////    @JsonManagedReference("etape-liste")  // Doit correspondre à `@JsonBackReference`
+//    private Set<Liste> liste = new HashSet<>();
 
 //    @ManyToMany(mappedBy = "etapes")
 //    @JsonBackReference
 //    private List<Activite> activites = new ArrayList<>();
     
 
-    public void addParticipantsToListeDebut(List<Participant> participants) {
-        for (Participant participant : participants) {
-            participant.setEtapeDebut(this);  // Associe à la liste début
-            this.listeDebut.add(participant);
-        }
-    }
+//    public void addParticipantsToListeDebut(List<Participant> participants) {
+//        for (Participant participant : participants) {
+//            participant.setEtapeDebut(this);  // Associe à la liste début
+//            this.listeDebut.add(participant);
+//        }
+//    }
 
-    public void addParticipantsToListeResultat(List<Participant> participants) {
-        for (Participant participant : participants) {
-            participant.setEtapeResultat(this);  // Associe à la liste résultat
-            this.listeResultat.add(participant);
-        }
-    }
+//    public void addParticipantsToListeResultat(List<Participant> participants) {
+//        for (Participant participant : participants) {
+//            participant.setEtapeResultat(this);  // Associe à la liste résultat
+//            this.listeResultat.add(participant);
+//        }
+//    }
 
 
 //

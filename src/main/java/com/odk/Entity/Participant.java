@@ -1,6 +1,7 @@
 package com.odk.Entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,27 +27,26 @@ public class Participant{
     private boolean checkedIn = false;  // Champ pour indiquer si le participant a été vérifié
     private LocalDateTime checkInTime;  // Champ pour l'heure de check-in
 
-
     @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name = "activite_id")
     @JsonBackReference
     private Activite activite;
 
-    @ManyToOne(cascade = CascadeType.DETACH)
-    @JoinColumn(name = "etape_debut_id")
-    @JsonBackReference("etapeDebutRef") // Nom unique pour la référence
-    private Etape etapeDebut;
-
-    @ManyToOne(cascade = CascadeType.DETACH)
-    @JoinColumn(name = "etape_resultat_id")
-    @JsonBackReference("etapeResultatRef") // Nom unique pour la référence
-    private Etape etapeResultat;
+//    @ManyToOne(cascade = CascadeType.DETACH)
+//    @JoinColumn(name = "etape_debut_id")
+////    @JsonBackReference("etapeDebutRef") // Nom unique pour la référence
+//    private Etape etapeDebut;
+//
+//    @ManyToOne(cascade = CascadeType.DETACH)
+//    @JoinColumn(name = "etape_resultat_id")
+////    @JsonBackReference("etapeResultatRef") // Nom unique pour la référence
+//    private Etape etapeResultat;
 
     @ManyToOne
     @JoinColumn(name = "liste_id")
-    @JsonBackReference
-//    @JsonBackReference("listeRef")
+    @JsonIgnore
     private Liste liste;
+   
     
      
 

@@ -18,10 +18,11 @@ public class ParticipantDTO {
     private String email;
     private String phone;
     private String genre;
-    private Activite activite; // Ajoutez le nom de l'activité
+    private ActiviteDTO activite; // Ajoutez le nom de l'activité
     private boolean checkedIn;
     private LocalDateTime checkInTime;
      private Liste liste;
+     
 
     public ParticipantDTO(Long id, String nom, String prenom, String email, String phone, String genre, boolean checkedIn, LocalDateTime checkInTime) {
         this.id = id;
@@ -35,7 +36,7 @@ public class ParticipantDTO {
         this.checkInTime = checkInTime;
     }
 
-    public ParticipantDTO(Participant participant) {
+    public ParticipantDTO(ParticipantDTO participant) {
         this.id = participant.getId();
         this.nom = participant.getNom();
         this.prenom = participant.getPrenom();

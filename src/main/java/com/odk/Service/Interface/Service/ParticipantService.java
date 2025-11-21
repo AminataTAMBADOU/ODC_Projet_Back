@@ -9,6 +9,7 @@ import com.odk.Repository.UtilisateurRepository;
 import com.odk.Service.Interface.CrudService;
 import com.odk.Utils.UtilService;
 import com.odk.dto.ParticipantDTO;
+import com.odk.dto.ParticipantMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class ParticipantService implements CrudService<Participant, Long> {
 //    private RoleRepository roleRepository;
 //    private ActiviteParticipantService activiteParticipantService;
     private ActiviteRepository activiteRepository;
+    private final ParticipantMapper participantMapper;
 
     @Override
     public Participant add(Participant entity) {
@@ -65,7 +67,7 @@ public class ParticipantService implements CrudService<Participant, Long> {
 
     public List<ParticipantDTO> listParticipant() {
         return participantRepository.findAll().stream()
-                .map(ParticipantDTO::new)
+                .map(participantMapper::PARTICIPANT_DTO)
                 .collect(Collectors.toList());
     }
 

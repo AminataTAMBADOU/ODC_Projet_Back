@@ -59,14 +59,14 @@ public class ActiviteController {
                     if (etapes != null) {
                         for (Etape etape : etapes) {
                             // Récupération de listeDebut
-                            listeDebutDTO.addAll(etape.getListeDebut().stream()
-                                    .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
-                                    .collect(Collectors.toList()));
+//                            listeDebutDTO.addAll(etape.getListeDebut().stream()
+//                                    .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
+//                                    .collect(Collectors.toList()));
 
                             // Récupération de listeResultat
-                            listeResultatDTO.addAll(etape.getListeResultat().stream()
-                                    .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
-                                    .collect(Collectors.toList()));
+//                            listeResultatDTO.addAll(etape.getListeResultat().stream()
+//                                    .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
+//                                    .collect(Collectors.toList()));
 
                             // Log de débogage
                             System.out.println("Étape: " + etape.getNom() + " Liste Résultat: " + listeResultatDTO);
@@ -83,13 +83,10 @@ public class ActiviteController {
                             activite.getLieu(),
                             activite.getDescription(),
                             activite.getObjectifParticipation(),
-                            etapes != null && !etapes.isEmpty() ? etapes.get(0) : null, // Prend la première étape
                             activite.getEntite(),
                             activite.getSalleId(),
                             activite.getCreatedBy(),
-                            activite.getTypeActivite(),
-                            listeDebutDTO,
-                            listeResultatDTO
+                            activite.getTypeActivite()
                     );
                 })
                 .collect(Collectors.toList());
@@ -111,6 +108,16 @@ public class ActiviteController {
     @ResponseStatus(HttpStatus.OK)
     public Activite modifier(@PathVariable Long id, @RequestBody Activite activite) {
             return activiteService.update(activite, id);
+    }
+   
+    
+    @PutMapping("/{id}/{listeEtape}")
+    @PreAuthorize("hasRole('PERSONNEL')")
+    @ResponseStatus(HttpStatus.OK)
+    public Activite modifierP(@PathVariable Long id,@PathVariable List<Long> listeEtape, @RequestBody ActiviteDTO activite) {
+        System.out.println("dans modifierP++++++++++"+listeEtape);
+//            return activiteService.update(activite, id);
+            return activiteService.updateDTO(activite,listeEtape, id);
     }
 
     @DeleteMapping("/{id}")
@@ -143,12 +150,12 @@ public class ActiviteController {
                             .filter(etape -> Statut.En_Cours.equals(etape.getStatut()))
                             .peek(etape -> {
                                 System.out.println("Étape valide en cours trouvée : " + etape.getNom());
-                                listeDebutDTO.addAll(etape.getListeDebut().stream()
-                                        .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
-                                        .toList());
-                                listeResultatDTO.addAll(etape.getListeResultat().stream()
-                                        .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
-                                        .toList());
+//                                listeDebutDTO.addAll(etape.getListeDebut().stream()
+//                                        .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
+//                                        .toList());
+//                                listeResultatDTO.addAll(etape.getListeResultat().stream()
+//                                        .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
+//                                        .toList());
                             })
                             .findAny()
                             .isPresent();
@@ -165,17 +172,12 @@ public class ActiviteController {
                                 activite.getStatut(),
                                 activite.getLieu(),
                                 activite.getDescription(),
-                                activite.getObjectifParticipation(),
-                                activite.getEtapes().stream()
-                                        .filter(etape -> Statut.En_Cours.equals(etape.getStatut()))
-                                        .findFirst() // Prend la première étape en cours, s'il y en a
-                                        .orElse(null),
+                                activite.getObjectifParticipation(),//                                
                                 activite.getEntite(),
                                 activite.getSalleId(),
                                 activite.getCreatedBy(),
-                                activite.getTypeActivite(),
-                                listeDebutDTO,
-                                listeResultatDTO
+                                activite.getTypeActivite()
+//                               
                         );
                     }
                     System.out.println("Aucune étape EN_COURS pour l'activité: " + activite.getNom());

@@ -1,6 +1,7 @@
 package com.odk.Entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.odk.Enum.Statut;
@@ -56,13 +57,9 @@ public class Activite {
     @JsonIgnore
     private TypeActivite typeActivite;
 
-    @ManyToMany
-    @JoinTable(
-            name = "activite_etape",
-            joinColumns = @JoinColumn(name = "activite_id"),
-            inverseJoinColumns = @JoinColumn(name = "etape_id")
-    )
+    @OneToMany(mappedBy = "activite", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Etape> etapes = new ArrayList<>();
+    
 
     @ManyToOne
     @JoinColumn(name = "created_by")

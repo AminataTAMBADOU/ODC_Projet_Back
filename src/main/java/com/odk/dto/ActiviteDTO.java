@@ -11,8 +11,12 @@ import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ActiviteDTO {
     private Long id;
     private String nom;
@@ -25,16 +29,16 @@ public class ActiviteDTO {
     private String lieu;
     private String description;
     private int objectifParticipation;
-    private Etape etapes;
+    private List<Etape> etapes;
     private Entite entite;
     private Salle salleId;
     private Utilisateur createdBy;
     private TypeActivite typeActivite;
-    private List<ParticipantDTO> listeDebut; // Liste de participants pour l'étape de début
-    private List<ParticipantDTO> listeResultat; // Liste de participants pour l'étape de résultat
-    private List<ActiviteValidationDTO> activitevalidation;
+//    private List<ParticipantDTO> listeDebut; // Liste de participants pour l'étape de début
+//    private List<ParticipantDTO> listeResultat; // Liste de participants pour l'étape de résultat
+   private List<ActiviteValidationDTO> activitevalidation;
     // Constructeur
-    public ActiviteDTO(Long id, String nom, String titre, Date dateDebut, Date dateFin, Statut statut, String lieu, String description, int objectifParticipation, Etape etapes, Entite entite, Salle salleId, Utilisateur createdBy, TypeActivite typeActivite, List<ParticipantDTO> listeDebut, List<ParticipantDTO> listeResultat) {
+    public ActiviteDTO(Long id, String nom, String titre, Date dateDebut, Date dateFin, Statut statut, String lieu, String description, int objectifParticipation,  Entite entite, Salle salleId, Utilisateur createdBy, TypeActivite typeActivite) {
         this.id = id;
         this.nom = nom;
         this.titre = titre;
@@ -47,10 +51,8 @@ public class ActiviteDTO {
         this.entite = entite;
         this.salleId = salleId;
         this.createdBy=createdBy;
-        this.etapes = etapes;
-        this.typeActivite = typeActivite;
-        this.listeDebut = listeDebut;
-        this.listeResultat = listeResultat;
+           this.typeActivite = typeActivite;
+//       
     }
      public ActiviteDTO(Long id, List<ActiviteValidationDTO> activitevalidation, String nom, Date dateDebut, Date dateFin, Statut statut, String lieu, String description, int objectifParticipation, Entite entite, Salle salleId,Utilisateur createdBy, TypeActivite typeActivite) {
         this.id = id;

@@ -3,10 +3,8 @@ package com.odk.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.odk.Entity.Etape;
 import com.odk.Entity.Liste;
-import com.odk.Entity.Participant;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+
 
 import java.time.LocalDateTime;
 @Data
@@ -16,10 +14,11 @@ public class ListeDTO {
     private LocalDateTime dateHeure;
     private boolean listeDebut;
     private boolean listeResultat;
-    private Etape etape;
+    private EtapeDTO etape;
+    
 
     // Constructeur pour mapper Liste -> ListeDTO
-    public ListeDTO(Liste liste) {
+    public ListeDTO(ListeDTO liste) {
         this.id = liste.getId();
         this.dateHeure = liste.getDateHeure();
         this.listeDebut = liste.isListeDebut();

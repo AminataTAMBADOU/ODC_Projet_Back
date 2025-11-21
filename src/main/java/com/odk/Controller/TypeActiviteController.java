@@ -29,7 +29,7 @@ public class TypeActiviteController {
 
 
     @PostMapping
-    @PreAuthorize("hasRole('PERSONNEL')")
+    @PreAuthorize("hasRole('PERSONNEL') or hasRole('SUPERADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<TypeActivite> addTypeActivite(@RequestBody TypeActivite typeActivite) {
         TypeActivite saveTypeActivite = typeActiviteService.add(typeActivite);

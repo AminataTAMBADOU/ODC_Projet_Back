@@ -1,15 +1,20 @@
 package com.odk.Service.Interface.Service;
 
 import com.odk.Entity.Activite;
+import com.odk.Entity.Etape;
 import com.odk.Entity.Salle;
 import com.odk.Entity.Utilisateur;
 import com.odk.Enum.Statut;
 import com.odk.Repository.ActiviteRepository;
+import com.odk.Repository.EtapeRepository;
 import com.odk.Repository.SalleRepository;
 import com.odk.Repository.UtilisateurRepository;
 import com.odk.Service.Interface.CrudService;
+import com.odk.dto.ActiviteDTO;
+import com.odk.dto.EtapeDTO;
 import jakarta.transaction.Transactional;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataAccessException;
@@ -32,7 +37,9 @@ public class ActiviteService implements CrudService<Activite, Long> {
     private EmailService emailService;
     private UtilisateurService utilisateurService;
     private UtilisateurRepository utilisateurRepository;
-     private SalleRepository salleRepository;
+    private SalleRepository salleRepository;
+    private EtapeRepository etapeRepository;
+     
 
     @Override
     public Activite add(Activite entity) {
@@ -174,11 +181,12 @@ public void envoiMail(Activite activiteCree){
     public Optional<Activite> findById(Long id) {
         return activiteRepository.findById(id);
     }
-
+//Pas utiliser
     @Transactional
     @Override
     public Activite update(Activite activite, Long id) {
         // Récupérer l'utilisateur connecté
+         System.out.println("update activite============="+activite.getEtapes().toString());
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
@@ -221,6 +229,11 @@ public void envoiMail(Activite activiteCree){
             if (activite.getEtapes() != null) {
                 a.getEtapes().clear();
                 a.getEtapes().addAll(activite.getEtapes());
+                for (Etape e : activite.getEtapes()) {
+                    System.out.println("etape===="+e);
+//                    e.setActivite(a);
+//                    etapeRepository.save(e);
+                }
             }
 
            /* // Mettre à jour les étapes
@@ -234,6 +247,67 @@ public void envoiMail(Activite activiteCree){
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "L'activité avec l'ID spécifié n'existe pas."));
     }
 
+    @Transactional    
+    public Activite updateDTO(ActiviteDTO activite,List<Long> etapes, Long id) {
+        // Récupérer l'utilisateur connecté
+        System.out.println("update activite ETAPES============="+activite.getEtapes());
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
+
+        return activiteRepository.findById(id).map(a -> {
+            // Vérifier que l'utilisateur connecté est le créateur de l'activité
+            if (!a.getCreatedBy().getEmail().equals(utilisateur.getEmail())) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Vous n'êtes pas autorisé à modifier cette activité.");
+            }
+
+            // Mettre à jour les champs modifiables
+            if (activite.getNom() != null) {
+                a.setNom(activite.getNom());
+            }
+            if (activite.getTitre() != null) {
+                a.setTitre(activite.getTitre());
+            }
+            if (activite.getDescription() != null) {
+                a.setDescription(activite.getDescription());
+            }
+            if (activite.getDateDebut() != null) {
+                a.setDateDebut(activite.getDateDebut());
+            }
+            if (activite.getLieu() != null) {
+                a.setLieu(activite.getLieu());
+            }
+            if (activite.getObjectifParticipation() != 0) {
+                a.setObjectifParticipation(activite.getObjectifParticipation());
+            }
+            if (activite.getEntite() != null) {
+                a.setEntite(activite.getEntite());
+            }
+            if (activite.getTypeActivite() != null) {
+                a.setTypeActivite(activite.getTypeActivite());
+            }
+            if (activite.getSalleId() != null) {
+                a.setSalleId(activite.getSalleId());
+            }
+            // DES MODIFICATION AFFAIRE ICI 
+            if(etapes!=null){
+                 List<Etape>etapesliste=etapeRepository.findAllById(etapes);
+                for(Etape e:etapesliste){
+                    e.setActivite(a);
+                    etapeRepository.save(e);
+                }
+            }         
+
+           /* // Mettre à jour les étapes
+            updateEtapes(a, activite.getEtapes());*/
+
+            // Mettre à jour le statut
+            a.mettreAJourStatut();
+
+            // Sauvegarder les modifications
+            return activiteRepository.save(a);
+        }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "L'activité avec l'ID spécifié n'existe pas."));
+    }
  /*   private void updateEtapes(Activite activite, List<Etape> nouvellesEtapes) {
         // Supprimer les étapes qui ne sont plus associées
         // Ajouter les nouvelles étapes
