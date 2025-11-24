@@ -44,14 +44,14 @@ public class SupportActiviteController {
         return ResponseEntity.ok(supports);
     }
 
-    // ------------------- GET BY ID -------------------
+    // -----------------GET BY ID/Recuperer un support par identifianr -------------------
     @GetMapping("/{id}")
     public ResponseEntity<SupportActiviteResponseDTO> getSupportById(@PathVariable Long id) {
         SupportActiviteResponseDTO dto = supportService.getSupportById(id);
         return ResponseEntity.ok(dto);
     }
 
-    // ------------------- UPDATE STATUT -------------------
+    // ------------------- UPDATE STATUT/mise à jour des statuts -------------------
     @PutMapping("/{id}/statut")
     public ResponseEntity<SupportActiviteResponseDTO> updateStatut(
             @PathVariable Long id,
@@ -80,5 +80,7 @@ public ResponseEntity<List<HistoriqueSupportActiviteDTO>> getHistorique(@PathVar
     List<HistoriqueSupportActiviteDTO> historiques = supportService.getHistorique(id);
     return ResponseEntity.ok(historiques);
 }
-   
+
+
+
 }

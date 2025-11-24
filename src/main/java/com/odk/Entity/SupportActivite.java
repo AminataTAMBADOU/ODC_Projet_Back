@@ -36,11 +36,11 @@ public class SupportActivite {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-
     private String nom;
     private String type;
     private String url;
+    @Column(name = "taille",nullable = true)
+    private Long taille; // <-- la taille des fichiers uploads ...
 
     @Column(length = 100)
     private String description;

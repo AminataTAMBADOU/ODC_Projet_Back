@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,8 +44,9 @@ public class SupportActiviteService {
     @Autowired
     private HistoriqueSupportActiviteRepository historiqueRepository;
 
-    // ---------------- Upload d’un support ------------------
-    public SupportActivite saveSupport(MultipartFile file, Long idActivite, String description2, Long utilisateurId, String description) throws IOException {
+// ---------------- Upload d’un support ou telechargement d'un fichier dans notre espace de stockage ----------------------------------------------//
+//------------------------------------------------------------------------------------------------------------------------------------------------//
+    public SupportActivite saveSupport(MultipartFile file, Long idActivite, String username, Long utilisateurId, String description) throws IOException {
         // Créer le dossier si inexistant
         Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
@@ -74,6 +76,8 @@ public class SupportActiviteService {
         support.setUtilisateurAutorise(utilisateur);  // l'utilisateur qui peut modifier/commenter
         support.setDateAjout(new Date());
         support.setDescription(description);
+         // 🔥 Enregistrer la taille du fichier !
+        support.setTaille(file.getSize());
 
         SupportActivite saved = supportActiviteRepository.save(support);
 
@@ -83,12 +87,13 @@ public class SupportActiviteService {
         historique.setStatut(saved.getStatut());
         historique.setCommentaire(saved.getCommentaire());
         historique.setDateModification(saved.getDateAjout());
+        historique.setEmailAuteur(utilisateur.getEmail()); // <-- email de l'utilisateur autorisé
         historiqueRepository.save(historique);
 
         return saved;
     }
-
-    // ---------------- Mise à jour du statut ------------------
+// --------------- Mise à jour du statut dans l'hustorique des supports existants---------------------------------//
+// ---------------------------------------------------------------------------------------------------------------//
     public SupportActivite updateStatut(Long supportId, StatutSupport statut, String commentaire, String username) {
         SupportActivite support = supportActiviteRepository.findById(supportId)
                 .orElseThrow(() -> new RuntimeException("Support non trouvé"));
@@ -102,33 +107,35 @@ public class SupportActiviteService {
         support.setCommentaire(commentaire);
         support.setDateAjout(new Date());
 
-        // Historique
+      // Permet d'enregistrer une mise à jour dans Historique
         HistoriqueSupportActivite historique = HistoriqueSupportActivite.builder()
                 .support(support)
                 .statut(statut)
                 .commentaire(commentaire)
                 .dateModification(new Date())
+                .emailAuteur(username) // <-- On recupere l'email de utilisateur qui fait la modification...
                 .build();
         historiqueRepository.save(historique);
 
         return supportActiviteRepository.save(support);
     }
 
-    // ---------------- Liste des supports ------------------
+// ---------------- Liste des supports créer dans notre base de donnée ------------------//
+//--------------------------------------------------------------------------------------//
     public List<SupportActiviteResponseDTO> getAllSupports() {
         return supportActiviteRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-
-    // ---------------- Support par ID ------------------
+// ---------------- Recuperer un Support par ID -------------------------------------//
+//----------------------------------------------------------------------------------//
     public SupportActiviteResponseDTO getSupportById(Long id) {
         SupportActivite support = supportActiviteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Support non trouvé"));
         return convertToDTO(support);
     }
-
-     // --- DELETE Support ---
+// --- DELETE Support/Supprimer le support de la base de donnée ------------------//
+//-------------------------------------------------------------------------------//
     public void deleteSupport(Long supportId, String username) throws IOException {
         SupportActivite support = supportActiviteRepository.findById(supportId)
                 .orElseThrow(() -> new RuntimeException("Support non trouvé"));
@@ -161,8 +168,8 @@ public class SupportActiviteService {
                 ))
                 .collect(Collectors.toList());
     }
-
-    // ---------------- Conversion Entité → DTO ------------------
+// ---------------- Conversion Entité → DTO -----------------------------------------//
+//----------------------------------------------------------------------------------//
     public SupportActiviteResponseDTO convertToDTO(SupportActivite support) {
         SupportActiviteResponseDTO dto = new SupportActiviteResponseDTO();
         dto.setId(support.getId());
@@ -176,6 +183,9 @@ public class SupportActiviteService {
         dto.setActiviteId(support.getActivite().getId());
         dto.setActiviteNom(support.getActivite().getNom());
         dto.setEmailutilisateurAutorise(support.getUtilisateurAutorise().getEmail());
+
+        // Ajout des historiques...
+        dto.setHistoriques(getHistorique(support.getId()));
         return dto;
     }
 }

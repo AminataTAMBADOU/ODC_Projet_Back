@@ -39,19 +39,32 @@ public class JwtFilter extends OncePerRequestFilter {
         final String authorization = request.getHeader("Authorization");
         if(authorization != null && authorization.startsWith("Bearer ")){
             token = authorization.substring(7);
+            System.out.println("JWTFilter: Token reçu -> " + token);
+
+            //Verifie que le token existe dans la BDD
             tokenDansLaBDD = this.jwtService.tokenByValue(token);
+            if (tokenDansLaBDD==null) {
+                System.out.println("JWTFilter: Token introuvable dans la BDD !");
+            } else {
+            //Verifie que le token existe dans la BDD
             isTokenExpired = jwtService.isTokenExpired(token);
             username = jwtService.extractUsername(token);
+            System.out.println("JWTFilter: Username extrait -> " + username);
+            System.out.println("JWTFilter: Token expiré ? -> " + isTokenExpired);
+            }
         }
 
-        if(
-                !isTokenExpired
-                        && tokenDansLaBDD.getUtilisateur().getEmail().equals(username)
-                        && SecurityContextHolder.getContext().getAuthentication() == null
-        ) {
+    if(!isTokenExpired && tokenDansLaBDD.getUtilisateur().getEmail().equals(username)&& SecurityContextHolder.getContext().getAuthentication() == null) {
+            //Changer l'utilisateur et mettre dans le conteste
             UserDetails userDetails = utilisateurService.loadUserByUsername(username);
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            // 🔹 TEST : afficher l’utilisateur authentifié
+                System.out.println("JWTFilter: UTILISATEUR AUTHENTIFIÉ = " + username);
+             } else {
+                System.out.println("JWTFilter: PAS D'AUTHENTIFICATION, token expiré ou invalide");
+                System.out.println("Controller: USER CONNECTÉ = " + username);
+
             // Transformer les rôles en authorities avec le préfixe ROLE_
                     //List<SimpleGrantedAuthority> authorities = userDetails.getAuthorities().stream()
                             //.map(a -> new SimpleGrantedAuthority("ROLE_" + a.getAuthority()))
