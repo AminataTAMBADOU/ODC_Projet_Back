@@ -38,7 +38,7 @@ public class UtilisateurController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('PERSONNEL') or hasRole('SUPERADMIN')")
+    // @PreAuthorize("hasRole('PERSONNEL') or hasRole('SUPERADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public List<UtilisateurDTO> Liste(){
 
