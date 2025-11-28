@@ -5,14 +5,24 @@
 package com.odk.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.odk.Entity.Activite;
 import com.odk.Entity.ActiviteValidation;
+import com.odk.Entity.Salle;
 import com.odk.Entity.Utilisateur;
+import com.odk.Repository.ActiviteRepository;
 import com.odk.Repository.ActiviteValidationRepository;
+import com.odk.Repository.SalleRepository;
 import com.odk.Service.Interface.Service.ActiviteValidationService;
+import com.odk.Service.Interface.Service.EmailService;
+import com.odk.Service.Interface.Service.UtilisateurService;
 import com.odk.dto.ActiviteValidationDTO;
+import com.odk.dto.ActiviteValidationMapper;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -42,8 +52,17 @@ public class ActiviteValidationController {
     private ActiviteValidationService activiteValidationService;
     @Autowired
     private ActiviteValidationRepository activiteValidationRepository;
+    @Autowired
+    private ActiviteRepository activiteRepository;
   @Autowired
-  private ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
+  @Autowired
+  private SalleRepository salleRepository;
+  @Autowired
+  private UtilisateurService utilisateurService;
+  @Autowired
+  private EmailService emailService;
+  private  ActiviteValidationMapper activiteValidationMapper ;
   
     @GetMapping("/HELLO")    
     public String hello(){
@@ -61,6 +80,13 @@ public class ActiviteValidationController {
             // Convertir la chaîne JSON reçue en DTO
             ActiviteValidationDTO dto = objectMapper.readValue(validationJson, ActiviteValidationDTO.class);
                dto.setDate(new Date()); 
+               dto.setIsRead(false);
+               // envoir de mail pour la validation 
+               ActiviteValidationDTO actSave=activiteValidationService.ajouterValidation(dto, fichier);
+               System.out.println("ACTIVALIDATION DTO+++++++++"+actSave);
+               String titre1="Assignation";
+               String titre2="Reponse à la validation";
+               envoiMailValidation(actSave,titre1,titre2);
             return ResponseEntity.ok(activiteValidationService.ajouterValidation(dto, fichier));
 
         } catch (Exception e) {
@@ -69,6 +95,84 @@ public class ActiviteValidationController {
                     .body(Map.of("message", "Erreur interne : " + e.getMessage()));
         }
     }
+
+    public void envoiMailValidation(ActiviteValidationDTO activiteCree,String t1,String t2){
+     // Récupérer la liste des utilisateurs
+    Date dateCreation = activiteCree.getDate();        
+    Date dateDebut = activiteRepository.findById(activiteCree.getActiviteId()).get().getDateDebut();
+    Date dateFin = activiteRepository.findById(activiteCree.getActiviteId()).get().getDateFin();
+    SimpleDateFormat form= new SimpleDateFormat("dd/MM/yyyy");    
+    String date1=form.format(dateDebut);
+    String date2=form.format(dateFin);
+    String date3=form.format(dateCreation);
+    Salle s=salleRepository.findById(activiteRepository.findById(activiteCree.getActiviteId()).get().getSalleId().getId()).get();
+    String salle=s.getNom();
+    String commentaire=activiteCree.getCommentaire();
+    String fichier=activiteCree.getFichierjoint();   
+    List<Utilisateur> utilisateurs = utilisateurService.List(); // Assurez-vous d'avoir cette méthode
+
+             //  Filtrer les utilisateurs ayant le rôle "personnel"
+    List<String> emailsPersonnel = utilisateurs.stream()
+                    .filter(utilisateur -> utilisateur.getRole().getNom().equals("PERSONNEL")) // Vérifiez que le rôle est bien défini
+                    .map(Utilisateur::getEmail) // Récupérer les emails
+                    .collect(Collectors.toList());
+            List<String> emailvalidation=new ArrayList<>();
+            for (String mail:emailsPersonnel){
+                if(mail.equalsIgnoreCase(utilisateurService.findById(activiteCree.getSuperviseurId()).get().getEmail())){
+                    emailvalidation.add(mail);
+                }
+            }
+            
+            // Construire le corps de l'email avec HTML pour une meilleure présentation
+            StringBuilder emailBodyBuilder = new StringBuilder();
+            emailBodyBuilder.append("<!DOCTYPE html>");
+            emailBodyBuilder.append("<html lang=\"fr\">");
+            emailBodyBuilder.append("<head>");
+            emailBodyBuilder.append("<meta charset=\"UTF-8\">");
+            emailBodyBuilder.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
+            emailBodyBuilder.append("<title>Nouvelle Activité Créée dont vous etes designés comme SUPERVISEUR</title>");
+            emailBodyBuilder.append("<style>");
+            emailBodyBuilder.append("  body { font-family: Arial, sans-serif; background-color: #f39c12; margin: 0; padding: 20px; }");
+            emailBodyBuilder.append("  .container { background-color: #ffffff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }");
+            emailBodyBuilder.append("  .header { text-align: center; padding-bottom: 20px; }");
+            emailBodyBuilder.append("  .content { line-height: 1.6; }");
+            emailBodyBuilder.append("  .footer { margin-top: 20px; font-size: 0.9em; color: #555555; text-align: center; }");
+            emailBodyBuilder.append("</style>");
+            emailBodyBuilder.append("</head>");
+            emailBodyBuilder.append("<body>");
+            emailBodyBuilder.append("<div class=\"container\">");
+            emailBodyBuilder.append("<div class=\"header\">");
+            emailBodyBuilder.append("<h2>Nouvelle Validation Créée à la date du : ").append(date3).append("</h2>");
+            emailBodyBuilder.append("</div>");
+            emailBodyBuilder.append("<div class=\"content\">");
+            emailBodyBuilder.append("<p>Bonjour,</p>");
+            emailBodyBuilder.append("<p>Une nouvelle activité a été créée dans notre système dont vous etes choisis comme SUPERVISEUR.</p>");
+            emailBodyBuilder.append("<p><strong>Nom de l'activité :</strong> ").append(activiteRepository.findById(activiteCree.getActiviteId()).get().getNom()).append("</p>");
+            emailBodyBuilder.append("<p><strong>Description :</strong> ").append(activiteRepository.findById(activiteCree.getActiviteId()).get().getDescription()).append("</p>");
+            emailBodyBuilder.append("<p><strong>Date du:</strong> ").append(date1).append(" AU: ").append(date2).append("</p>");
+            emailBodyBuilder.append("<p><strong>Dans la Salle :</strong> ").append(salle).append("</p>");
+            
+            emailBodyBuilder.append("<p><strong>Commentaire pour la validation :</strong> ").append(commentaire).append("</p>");
+            emailBodyBuilder.append("<p><strong>Piéce Jointe :</strong> ").append(fichier).append("</p>");
+
+            emailBodyBuilder.append("<p>Nous vous invitons à consulter cette activitéValidation, pour plus de détails.</p>");
+            emailBodyBuilder.append("</div>");
+            emailBodyBuilder.append("<div class=\"footer\">");
+            emailBodyBuilder.append("<p>L'équipe <strong>ODC</strong></p>");
+            emailBodyBuilder.append("<p>Ceci est un email automatisé. Merci de ne pas y répondre.</p>");
+            emailBodyBuilder.append("</div>");
+            emailBodyBuilder.append("</div>");
+            emailBodyBuilder.append("</body>");
+            emailBodyBuilder.append("</html>");
+
+            String emailBody = emailBodyBuilder.toString();
+            String sujet = "Assignation de nouvelle VALIDATION pour l'activite : " + activiteRepository.findById(activiteCree.getActiviteId()).get().getNom();
+//emailService.sendSimpleEmail("fatoumata.KALOGA@orangemali.com", sujet, emailBody);
+// Envoyer un email HTML à chaque utilisateur ayant le rôle "personnel"
+            for (String email : emailvalidation) {
+                 emailService.sendSimpleEmail(email, sujet, emailBody);
+            }
+}
 
     // Liste toutes les validations
     @GetMapping

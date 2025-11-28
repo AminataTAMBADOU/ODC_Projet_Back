@@ -15,7 +15,7 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface ActiviteValidationMapper {
 
     ActiviteValidationMapper INSTANCE = Mappers.getMapper(ActiviteValidationMapper.class);

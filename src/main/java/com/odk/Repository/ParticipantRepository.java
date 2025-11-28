@@ -1,6 +1,8 @@
 package com.odk.Repository;
 
 import com.odk.Entity.Participant;
+import java.time.LocalDate;
+import java.util.Date;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -25,8 +27,67 @@ public interface ParticipantRepository extends JpaRepository<Participant, Long> 
     @Modifying
     @Query("DELETE FROM Participant p WHERE p.liste.id = :listeId")
     void deleteByListeId(@Param("listeId") Long listeId);
+    
+// @Query(name="SELECT p FROM Participant p,Activite a,Entite e WHERE a.entite.id=e.id and a.id=p.activite.id and (p.activite.id = :activiteId or p.activite.entite.id = :entiteId)")
+//List<Participant>findParCritereCustom(@Param("dateDebut") String dateDebut,@Param("dateFin") String dateFin,@Param("activiteId") Long activiteId,@Param("entiteId") Long entiteId);
 
-
+@Query("""
+    SELECT p 
+    FROM Participant p WHERE p.activite.entite.id= :entiteId
+  """)        
+List<Participant> findParCritereCustom1(
+         @Param("entiteId") Long entiteId
+);
+@Query("""
+    SELECT p 
+    FROM Participant p WHERE p.activite.id = :activiteId AND p.activite.entite.id = :entiteId     
+""")        
+List<Participant> findParCritereCustom2(
+        @Param("activiteId") Long activiteId,
+        @Param("entiteId") Long entiteId
+);
+@Query("""
+    SELECT p 
+    FROM Participant p   
+    WHERE p.activite.id = :activiteId AND p.activite.entite.id = :entiteId 
+    AND (p.activite.dateDebut >= :dateDebut)
+      
+""")
+        
+List<Participant> findParCritereCustom3(
+        @Param("dateDebut") LocalDate dateDebut,
+        @Param("activiteId") Long activiteId,
+        @Param("entiteId") Long entiteId
+);
+    @Query("""
+    SELECT p 
+    FROM Participant p
+    JOIN p.activite a
+    JOIN a.entite e
+    WHERE ( a.id = :activiteId)
+      AND ( e.id = :entiteId)
+      AND ( a.dateDebut >= :dateDebut)
+      AND ( a.dateFin <= :dateFin)
+""")
+        
+List<Participant> findParCritereCustom(
+        @Param("dateDebut") LocalDate dateDebut,
+        @Param("dateFin") LocalDate dateFin,
+        @Param("activiteId") Long activiteId,
+        @Param("entiteId") Long entiteId
+);
+@Query("""
+    SELECT p 
+    FROM Participant p    
+    WHERE (:activiteId IS NULL OR p.activite.id = :activiteId)
+      AND (:entiteId IS NULL OR p.activite.entite.id = :entiteId)
+      AND (:dateDebut IS NULL OR p.activite.dateDebut >= :dateDebut)
+      AND (:dateFin IS NULL OR p.activite.dateFin <= :dateFin)
+""")
+List<Participant>searcDynamic(@Param("dateDebut") LocalDate dateDebut,
+        @Param("dateFin") LocalDate dateFin,
+        @Param("activiteId") Long activiteId,
+        @Param("entiteId") Long entiteId);
 
 //    List<Participant> findByEtapeDebut(Long etapeDebutId);
 //    List<Participant> findByEtapeResultat(Long etapeResultatId);

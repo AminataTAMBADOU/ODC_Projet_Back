@@ -11,9 +11,13 @@ import com.odk.Repository.SalleRepository;
 import com.odk.Repository.UtilisateurRepository;
 import com.odk.Service.Interface.CrudService;
 import com.odk.dto.ActiviteDTO;
+import com.odk.dto.ActiviteMapper;
 import com.odk.dto.EtapeDTO;
+import com.odk.dto.EtapeDTOSansActivite;
+import com.odk.dto.EtapeMapper;
 import jakarta.transaction.Transactional;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import lombok.AllArgsConstructor;
@@ -24,7 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -39,6 +45,8 @@ public class ActiviteService implements CrudService<Activite, Long> {
     private UtilisateurRepository utilisateurRepository;
     private SalleRepository salleRepository;
     private EtapeRepository etapeRepository;
+    private final ActiviteMapper activiteMapper;
+    private final EtapeMapper etapeMapper;
      
 
     @Override
@@ -164,6 +172,10 @@ public void envoiMail(Activite activiteCree){
     public List<Activite> List() {
         return activiteRepository.findAll();
     }
+    //Par user
+    public List<Activite> ListByUser(Long userId) {
+        return activiteRepository.findByUser(userId);
+    }
 
     public List<Activite> list() {
         // Récupérer toutes les activités
@@ -247,8 +259,48 @@ public void envoiMail(Activite activiteCree){
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "L'activité avec l'ID spécifié n'existe pas."));
     }
 
+@Transactional
+public Activite updateDTO(ActiviteDTO activite, List<Long> etapesids, Long id) {
+
+    String email = SecurityContextHolder.getContext().getAuthentication().getName();
+    Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
+
+    return activiteRepository.findById(id).map(a -> {
+
+        // Vérification propriétaire
+        if (!a.getCreatedBy().getEmail().equals(utilisateur.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vous n'avez pas le droit de modifier cette activité");
+        }
+
+        // Mise à jour des champs (MapStruct)
+        activiteMapper.updateFromDto(activite, a);
+
+        // Mise à jour des étapes
+        if (etapesids != null) {
+            System.out.println("mes etape================"+etapesids);
+            for (Long etapeId : etapesids) {
+                Etape etape = etapeRepository.findById(etapeId)
+                        .orElseThrow(() -> new RuntimeException("Etape non trouvée"));
+                etape.setActivite(a); // juste ça suffit
+                 System.out.println("on etape================"+etape.getActivite().getNom());
+                etapeRepository.save(etape);
+                System.out.println("on etape================"+etape.getActivite().getNom());
+            }
+        }
+
+        // Mise à jour du statut
+        a.mettreAJourStatut();
+return a;
+//        return activiteRepository.save(a); // on sauvegarde directement l'entité
+    }).orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.NOT_FOUND, "Activité introuvable")
+    );
+}
+
+
     @Transactional    
-    public Activite updateDTO(ActiviteDTO activite,List<Long> etapes, Long id) {
+    public Activite updateDTOold(ActiviteDTO activite,List<Long> etapesids, Long id) {
         // Récupérer l'utilisateur connecté
         System.out.println("update activite ETAPES============="+activite.getEtapes());
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -289,30 +341,110 @@ public void envoiMail(Activite activiteCree){
             if (activite.getSalleId() != null) {
                 a.setSalleId(activite.getSalleId());
             }
+            //utiliser MapStruct pour mettre à jour seulement les champs non-nuls
+             activiteMapper.updateFromDto(activite, a); // voir MapStruct plus bas
+            // Mettre à jour le statut
+            a.mettreAJourStatut();
+    //  gérer les etapes explicitement (merge, ne pas remplacer la collection)
+//    if (activite.getEtapes() != null) {
+//        // approach: update existing list items, add new, remove missing
+//        syncEtapesN(a, activite.getEtapes(),etapesids);
+//        System.out.println("etapesSansActivite APRES TRAITEMENT======="+a.getEtapes());
+//
+//    }
+
             // DES MODIFICATION AFFAIRE ICI 
-            if(etapes!=null){
-                 List<Etape>etapesliste=etapeRepository.findAllById(etapes);
-                for(Etape e:etapesliste){
+            if(etapesids!=null){
+              System.out.println("update activite ETAPES IS NOT NULL ID============="+etapesids);
+                for(Long i:etapesids){
+                    Etape e=etapeRepository.findById(i).get();
                     e.setActivite(a);
-                    etapeRepository.save(e);
+                    EtapeDTOSansActivite etatsansact=etapeMapper.toSansActivite(e);
+                    etatsansact.setActiviteid(e.getActivite().getId());
+                    etapeRepository.save(etapeMapper.toEntitesansActivite(etatsansact));
+
                 }
-            }         
+
+          }         
 
            /* // Mettre à jour les étapes
             updateEtapes(a, activite.getEtapes());*/
+        
+            ActiviteDTO adto=activiteMapper.ACTIVITE_DTO(a);
+            adto.getEtapes();
+            for(EtapeDTOSansActivite eT:adto.getEtapes()){
+            eT.setActiviteid(a.getId());
+            etapeRepository.save(etapeMapper.toEntitesansActivite(eT));
+        }
+// Sauvegarder les modifications
+         System.out.println("ActiviteDTO adto save======="+adto.getEtapes());
 
-            // Mettre à jour le statut
-            a.mettreAJourStatut();
-
-            // Sauvegarder les modifications
-            return activiteRepository.save(a);
+            return activiteRepository.save(activiteMapper.toEntity(adto));
+            
         }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "L'activité avec l'ID spécifié n'existe pas."));
     }
+    
  /*   private void updateEtapes(Activite activite, List<Etape> nouvellesEtapes) {
         // Supprimer les étapes qui ne sont plus associées
         // Ajouter les nouvelles étapes
         activite.getEtapes().addAll(nouvellesEtapes);
     }*/
+    @Transactional
+private void syncEtapes(Activite activite, List<EtapeDTOSansActivite> etapesSansActivite,List<Long> etapesids){
+    System.out.println("etapesSansActivite SEBUT======="+etapesSansActivite);
+    List<Etape> listeEtapeObjet=(etapeRepository.findAllById(etapesids));
+    System.out.println("etapesSansActivite AVEC OBJET======="+listeEtapeObjet);
+    Map<Long,Etape> existingById=activite.getEtapes().stream().filter(e->e.getId()!=null).collect(Collectors.toMap(Etape::getId,Function.identity()));
+    List<Etape> newlist=new ArrayList<>();
+    for(EtapeDTOSansActivite ea: etapesSansActivite){
+        if(ea.getId()!=null && existingById.containsKey(ea.getId())){
+            Etape toUpdate=existingById.get(ea.getId());
+            etapeMapper.updateFromDto(ea, toUpdate);
+            newlist.add(toUpdate);
+        }else{
+            System.out.println("save ea activiteID======="+ea.getActiviteid());            
+            Etape created=etapeMapper.toEntitesansActivite(ea);
+                        created.setActivite(activiteRepository.findById(ea.getActiviteid()).get());
+                        newlist.add(created);
+
+        }
+    }
+    activite.getEtapes().clear();
+    activite.getEtapes().addAll(newlist);
+}
+
+@Transactional
+private void syncEtapesN(Activite activite, List<EtapeDTOSansActivite> etapesSansActivite,List<Long> etapesids){
+    System.out.println("etapesSansActivite SEBUT======="+etapesids);
+    
+    List<Etape> existingEtapes=new ArrayList<>();
+     for(Long i:etapesids){
+         Etape e=etapeRepository.findById(i).get();
+         e.setActivite(activite);
+         existingEtapes.add(e);         
+         System.out.println("etapesSansActivite AVEC OBJET======="+existingEtapes);
+     }    
+     
+    for(Etape e:existingEtapes){
+    e.setActivite(activite);
+    System.out.println("etapesSansActivite avant save======="+e.getActivite());
+    etapeRepository.save(e);
+    System.out.println("etapesSansActivite apres save======="+e.getActivite());
+
+  }
+     
+   List<Etape> newEtapes=etapesSansActivite.stream()
+                        .filter(dto->dto.getId()==null)
+                        .map(dto->{
+                            Etape e=etapeMapper.toEntitesansActivite(dto);
+                            e.setActivite(activite);
+                            return e;
+                            }).collect(Collectors.toList());
+   
+    
+    activite.getEtapes().clear();
+    activite.getEtapes().addAll(existingEtapes);
+}
 
 
     @Override

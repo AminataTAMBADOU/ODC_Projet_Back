@@ -28,6 +28,7 @@ public class ActiviteValidationDTO {
     private Long envoyeurId;
     private Long activiteId;     
     private Long superviseurId;  
+    private Boolean isRead;
     public ActiviteValidationDTO(Long id, String commentaire, Date date, StatutValidation statut, String fichierjoint,Long envoyeurId, Long activiteId, Long superviseurId) {
         this.id = id;
         this.commentaire = commentaire;

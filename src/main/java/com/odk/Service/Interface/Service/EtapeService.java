@@ -9,6 +9,7 @@ import com.odk.Repository.*;
 import com.odk.Service.Interface.CrudService;
 import com.odk.dto.CritereDTO;
 import com.odk.dto.EtapeDTO;
+import com.odk.dto.EtapeDTOSansActivite;
 import com.odk.dto.EtapeMapper;
 import com.odk.dto.ParticipantDTO;
 import com.odk.helper.ExcelHelper;
@@ -121,9 +122,17 @@ private final EtapeMapper etapeMapper;
 
     public List<EtapeDTO> getAllEtapes() {
         List<Etape> etapes = etapeRepository.findAll();
-        return etapes.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+        return etapeMapper.listeEtape(etapes);
+//        return etapes.stream()
+//                .map(this::convertToDto)
+//                .collect(Collectors.toList());
+    }
+    public List<EtapeDTOSansActivite> getAllEtapesSansActivite() {
+        List<Etape> etapes = etapeRepository.findAll();
+//        return etapes.stream()
+//                .map(this::convertToDto)
+//                .collect(Collectors.toList());
+        return etapeMapper.listeEtapeSansActivite(etapes);
     }
 
 

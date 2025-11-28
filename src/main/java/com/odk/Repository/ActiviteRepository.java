@@ -17,11 +17,17 @@ public interface ActiviteRepository extends JpaRepository<Activite, Long> {
    long count();
    @Query("SELECT COUNT(DISTINCT e.activite) FROM Etape e WHERE e.statut = :statut")
    long countActivitesByStatut(@Param("statut") Statut statut);
+   
+   @Query("SELECT COUNT(*) FROM Activite a WHERE a.createdBy.id= :userId")
+   long countActivitesByUserCustom(@Param("userId") Long userId);
 
    long countByStatut(Statut statut);
 
    @Query("SELECT COUNT(a) FROM Activite a WHERE a.statut = :statut")
    long countByStatutCustom(@Param("statut") Statut statut);
+   
+     @Query("SELECT COUNT(a) FROM Activite a WHERE a.statut = :statut and a.createdBy.id=:userId")
+   long countByUserByStatutCustom(@Param("statut") Statut statut, @Param("userId") Long userId);
 
   /* @Query("SELECT a FROM Activite a WHERE a.salleId.id = :salleId AND " +
            "((:dateDebut BETWEEN a.dateDebut AND a.dateFin) OR " +
@@ -80,5 +86,14 @@ List<Activite> findConflictingNomActivites(
         nativeQuery = true
     )
     List<Activite> findAttenteBySuperviseurInValidation(@Param("superviseurId") Long superviseurId);
+    
+    
+    @Query(
+        value = """
+           SELECT * FROM activite a WHERE a.created_by_id=:userId ORDER BY a.date_debut DESC""",
+        nativeQuery = true
+    )
+            List<Activite> findByUser(@Param("userId") Long userId);
+    
     
 }

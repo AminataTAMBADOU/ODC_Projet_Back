@@ -42,7 +42,8 @@ public class ActiviteValidation {
     @JsonIgnore
     private Utilisateur superviseur;
    
-  
+   @Column(name="isRead")
+   private Boolean isRead;
 
     // Ajout d'un constructeur prenant un ID pour la désérialisation
     public ActiviteValidation(Long id) {

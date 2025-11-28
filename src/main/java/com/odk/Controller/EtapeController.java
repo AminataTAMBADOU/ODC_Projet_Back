@@ -7,6 +7,7 @@ import com.odk.Repository.EtapeRepository;
 import com.odk.Repository.UtilisateurRepository;
 import com.odk.Service.Interface.Service.EtapeService;
 import com.odk.dto.EtapeDTO;
+import com.odk.dto.EtapeDTOSansActivite;
 import com.odk.helper.ExcelHelper;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -74,7 +75,16 @@ public ResponseEntity<EtapeDTO> create(@PathVariable Long id,@RequestBody EtapeD
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<EtapeDTO>> getAllEtapes() {
         List<EtapeDTO> letap=etapeService.getAllEtapes();
-       System.out.println("mes etapes==============="+ letap);
+       System.out.println("mes etapes=AVEC ACTIVITE=============="+ letap);
+       System.out.println("mes etapes=SANS ACTIVITE=============="+ getAllEtapesSansActivite());
+        return ResponseEntity.ok(letap); // Utilise le service pour récupérer les étapes sous forme de DTO
+    }
+    @GetMapping("/sansactivite")
+    @PreAuthorize("hasRole('PERSONNEL') or hasRole('SUPERADMIN')")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<List<EtapeDTOSansActivite>> getAllEtapesSansActivite() {
+        List<EtapeDTOSansActivite> letap=etapeService.getAllEtapesSansActivite();
+       System.out.println("mes etapes sans activite==============="+ letap);
         return ResponseEntity.ok(letap); // Utilise le service pour récupérer les étapes sous forme de DTO
     }
 

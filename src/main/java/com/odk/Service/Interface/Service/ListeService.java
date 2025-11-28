@@ -25,6 +25,10 @@ public class ListeService implements CrudService<Liste, Long> {
     public Liste add(Liste liste) {
         return null;
     }
+   
+    public Liste add(ListeDTO liste) {
+        return listeRepository.save(listeMapper.toEntity(liste));
+    }
 
 
 public List<ListeDTO> getAllListes() {

@@ -9,6 +9,7 @@ import com.odk.Service.Interface.Service.ActiviteService;
 import com.odk.dto.ActiviteDTO;
 import com.odk.dto.ActiviteMapper;
 import com.odk.dto.ActiviteValidationDTO;
+import com.odk.dto.EtapeMapper;
 import com.odk.dto.ParticipantDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,6 +31,8 @@ public class ActiviteController {
     private final ActiviteRepository activiteRepository;
     private ActiviteService activiteService;
     private EtapeRepository etapeRepository;
+    private final EtapeMapper etapeMapper;
+     private final ActiviteMapper activiteMapper;
   
     
 
@@ -50,54 +53,59 @@ public class ActiviteController {
     @PreAuthorize("hasRole('PERSONNEL') or hasRole('SUPERADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public List<ActiviteDTO> listerActivite() {
-        return activiteService.List().stream()
-                .map(activite -> {
-                    List<Etape> etapes = (List<Etape>) activite.getEtapes();
-                    List<ParticipantDTO> listeDebutDTO = new ArrayList<>();
-                    List<ParticipantDTO> listeResultatDTO = new ArrayList<>();
-
-                    if (etapes != null) {
-                        for (Etape etape : etapes) {
-                            // Récupération de listeDebut
-//                            listeDebutDTO.addAll(etape.getListeDebut().stream()
-//                                    .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
-//                                    .collect(Collectors.toList()));
-
-                            // Récupération de listeResultat
-//                            listeResultatDTO.addAll(etape.getListeResultat().stream()
-//                                    .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
-//                                    .collect(Collectors.toList()));
-
-                            // Log de débogage
-                            System.out.println("Étape: " + etape.getNom() + " Liste Résultat: " + listeResultatDTO);
-                        }
-                    }
-
-                    return new ActiviteDTO(
-                            activite.getId(),
-                            activite.getNom(),
-                            activite.getTitre(),
-                            activite.getDateDebut(),
-                            activite.getDateFin(),
-                            activite.getStatut(),
-                            activite.getLieu(),
-                            activite.getDescription(),
-                            activite.getObjectifParticipation(),
-                            activite.getEntite(),
-                            activite.getSalleId(),
-                            activite.getCreatedBy(),
-                            activite.getTypeActivite()
-                    );
-                })
-                .collect(Collectors.toList());
+        System.out.println("activite dto===="+activiteMapper.listeActivite(activiteService.List()));
+        return activiteMapper.listeActivite(activiteService.List());
+//        return activiteService.List().stream()
+//                .map(activite -> {
+//                    System.out.println("activite: ************" + activite.getNom());
+//                    List<Etape> etapes = (List<Etape>) activite.getEtapes();
+////                    List<ParticipantDTO> listeDebutDTO = new ArrayList<>();
+////                    List<ParticipantDTO> listeResultatDTO = new ArrayList<>();
+//
+//                    if (etapes != null) {
+//                        for (Etape etape : etapes) {
+//                             System.out.println("Etap***"+etape.getNom());
+//                            // Récupération de listeDebut
+////                            listeDebutDTO.addAll(etape.getListeDebut().stream()
+////                                    .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
+////                                    .collect(Collectors.toList()));
+//
+//                            // Récupération de listeResultat
+////                            listeResultatDTO.addAll(etape.getListeResultat().stream()
+////                                    .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
+////                                    .collect(Collectors.toList()));
+//
+//                            // Log de débogage
+////                            System.out.println("Étape: " + etape.getNom() + " Liste Résultat: " + listeResultatDTO);
+//                        }
+//                    }
+//
+//                    return new ActiviteDTO(
+//                            activite.getId(),
+//                            activite.getNom(),
+//                            activite.getTitre(),
+//                            activite.getDateDebut(),
+//                            activite.getDateFin(),
+//                            activite.getStatut(),
+//                            activite.getLieu(),
+//                            activite.getDescription(),
+//                            activite.getObjectifParticipation(),
+//                            activite.getEntite(),
+//                            etapeMapper.listeEtape(etapes),
+//                            activite.getSalleId(),
+//                            activite.getCreatedBy(),
+//                            activite.getTypeActivite()
+//                    );
+//                })
+//                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('PERSONNEL') or hasRole('SUPERADMIN')")
     @ResponseStatus(HttpStatus.OK)
-    public Optional<Activite> getActiviteParId(@PathVariable Long id) {
+    public ActiviteDTO getActiviteParId(@PathVariable Long id) {
         try {
-            return activiteService.findById(id);
+            return activiteMapper.ACTIVITE_DTO(activiteService.findById(id).get());
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erreur lors de la récupération de l'activité par ID", e);
         }
@@ -142,8 +150,8 @@ public class ActiviteController {
                 .map(activite -> {
                     System.out.println("Traitement de l'activité: " + activite.getNom());
 
-                    List<ParticipantDTO> listeDebutDTO = new ArrayList<>();
-                    List<ParticipantDTO> listeResultatDTO = new ArrayList<>();
+//                    List<ParticipantDTO> listeDebutDTO = new ArrayList<>();
+//                    List<ParticipantDTO> listeResultatDTO = new ArrayList<>();
 
                     // Filtrer les étapes en cours et remplir les listes de participants uniquement si l'étape est en cours
                     boolean hasEtapeEnCours = activite.getEtapes().stream()
@@ -174,6 +182,7 @@ public class ActiviteController {
                                 activite.getDescription(),
                                 activite.getObjectifParticipation(),//                                
                                 activite.getEntite(),
+                               
                                 activite.getSalleId(),
                                 activite.getCreatedBy(),
                                 activite.getTypeActivite()
@@ -290,6 +299,94 @@ public class ActiviteController {
     }).toList();
 
     return ResponseEntity.ok(activiteDTOS); 
+    }
+    
+    
+    //Statistiques par USER
+    
+     @GetMapping("/enCours/{userId}")
+    @PreAuthorize("hasRole('PERSONNEL') ")
+    public List<ActiviteDTO> listerActiviteEncoursByUser(@PathVariable("userId") Long userId ) {
+         System.out.println("activite by user========"+userId);
+        return activiteService.ListByUser(userId).stream()
+                .map(activite -> {
+                    System.out.println("Traitement de l'activitéby user: " + activite.getNom());
+
+//                    List<ParticipantDTO> listeDebutDTO = new ArrayList<>();
+//                    List<ParticipantDTO> listeResultatDTO = new ArrayList<>();
+
+                    // Filtrer les étapes en cours et remplir les listes de participants uniquement si l'étape est en cours
+                    boolean hasEtapeEnCours = activite.getEtapes().stream()
+                            .filter(etape -> Statut.En_Cours.equals(etape.getStatut()))
+                            .peek(etape -> {
+                                System.out.println("Étape valide en cours trouvée : " + etape.getNom());
+//                                listeDebutDTO.addAll(etape.getListeDebut().stream()
+//                                        .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
+//                                        .toList());
+//                                listeResultatDTO.addAll(etape.getListeResultat().stream()
+//                                        .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
+//                                        .toList());
+                            })
+                            .findAny()
+                            .isPresent();
+
+                    // Retourner l'ActiviteDTO seulement si une étape en cours est présente
+                    if (hasEtapeEnCours) {
+                        System.out.println("Activité avec étape EN_COURS trouvée: " + activite.getNom());
+                        return new ActiviteDTO(
+                                activite.getId(),
+                                activite.getNom(),
+                                activite.getTitre(),
+                                activite.getDateDebut(),
+                                activite.getDateFin(),
+                                activite.getStatut(),
+                                activite.getLieu(),
+                                activite.getDescription(),
+                                activite.getObjectifParticipation(),//                                
+                                activite.getEntite(),
+                               
+                                activite.getSalleId(),
+                                activite.getCreatedBy(),
+                                activite.getTypeActivite()
+//                               
+                        );
+                    }
+                    System.out.println("Aucune étape EN_COURS pour l'activité: " + activite.getNom());
+                    return null;
+                })
+                .filter(Objects::nonNull) // Supprimer les ActiviteDTO null (sans étape en cours)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/nombre/{userId}") // Pas de paramètres
+    @PreAuthorize("hasRole('PERSONNEL')")
+    public ResponseEntity<Long> getNombreActivite(@PathVariable("userId") Long userId) {
+        System.out.println("activite by user========"+userId);
+        long count = activiteRepository.countActivitesByUserCustom(userId);
+        return ResponseEntity.ok(count); // Retourne le nombre d'utilisateurs
+    }
+
+    @GetMapping("/nombreActivitesEncours/{userId}")
+    @PreAuthorize("hasRole('PERSONNEL')")
+    public ResponseEntity<Long> getNombreActivitesEncours(@PathVariable("userId") Long userId) {
+        System.out.println("activite by user========"+userId);
+        long count = activiteRepository.countByUserByStatutCustom(Statut.En_Cours,userId); // Compte les activités avec statut "En_Cours"
+        return ResponseEntity.ok(count); // Retourne le nombre d'activités
+    }
+
+    @GetMapping("/nombreActivitesEnAttente/{userId}")
+    public ResponseEntity<Long> getNombreActivitesEnAttente(@PathVariable("userId") Long userId) {
+        System.out.println("activite by user========"+userId);
+        long count = activiteRepository.countByUserByStatutCustom(Statut.En_Attente,userId); // Compte les activités avec statut "En_Cours"
+        return ResponseEntity.ok(count); // Retourne le nombre d'activités
+    }
+
+    @GetMapping("/nombreActivitesTerminer/{userId}")
+    @PreAuthorize("hasRole('PERSONNEL')")
+    public ResponseEntity<Long> getNombreActivitesTerminer(@PathVariable("userId") Long userId) {
+        System.out.println("activite by user========"+userId);
+        long count = activiteRepository.countByUserByStatutCustom(Statut.Termine,userId); // Compte les activités avec statut "En_Cours"
+        return ResponseEntity.ok(count); // Retourne le nombre d'activités
     }
 }
 

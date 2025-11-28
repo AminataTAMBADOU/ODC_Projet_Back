@@ -39,6 +39,11 @@ public class ListeController {
 
         listeService.delete(id);
     }
+    @PostMapping
+    @PreAuthorize("hasRole('PERSONNEL') or hasRole('SUPERADMIN')")
+    public List<ListeDTO> addListes() {
+        return listeService.getAllListes();
+    }
 
 
 

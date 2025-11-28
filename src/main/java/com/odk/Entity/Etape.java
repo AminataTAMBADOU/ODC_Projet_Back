@@ -24,16 +24,12 @@ public class Etape {
     @ManyToOne
     @JoinColumn(name = "activite_id")
     private Activite activite;
-
+    
     @JsonIgnore
     @OneToMany(mappedBy = "etape", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Liste> listes = new ArrayList<>();
 
-//    @ManyToOne
-//    @JoinColumn(name = "activite_id")
-//    @JsonManagedReference
-//    @JsonIgnore
-//     private Activite activite;
+
 
 //  @OneToMany(mappedBy = "etapeDebut", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 //  @JsonManagedReference("etapeDebutRef")
@@ -44,11 +40,9 @@ public class Etape {
 //  private List<Participant> listeResultat = new ArrayList<>();
     
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date dateDebut;
-    
+    private Date dateDebut;    
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date dateFin;
-    
+    private Date dateFin;    
     private Statut statut;
 
 //    @OneToMany(mappedBy = "etape", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -56,9 +50,7 @@ public class Etape {
 ////    @JsonManagedReference("etape-liste")  // Doit correspondre à `@JsonBackReference`
 //    private Set<Liste> liste = new HashSet<>();
 
-//    @ManyToMany(mappedBy = "etapes")
-//    @JsonBackReference
-//    private List<Activite> activites = new ArrayList<>();
+
     
 
 //    public void addParticipantsToListeDebut(List<Participant> participants) {

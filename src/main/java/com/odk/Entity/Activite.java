@@ -32,21 +32,11 @@ public class Activite {
     @Temporal(TemporalType.DATE)
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dateFin;
-
     private Statut statut;
-
     private String lieu;
-
     @Column(columnDefinition = "TEXT")
     private String description;
-
     private Integer objectifParticipation;
-
-    /*@ManyToOne(cascade = CascadeType.DETACH)
-    @JoinColumn(name = "etape_id")
-    @JsonIgnore
-    private Etape etape;
-*/
     @ManyToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name = "entite_id")
     @JsonIgnore
@@ -57,10 +47,8 @@ public class Activite {
     @JsonIgnore
     private TypeActivite typeActivite;
 
-    @OneToMany(mappedBy = "activite", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "activite", cascade = CascadeType.MERGE)
     private List<Etape> etapes = new ArrayList<>();
-    
-
     @ManyToOne
     @JoinColumn(name = "created_by")
     private Utilisateur createdBy;

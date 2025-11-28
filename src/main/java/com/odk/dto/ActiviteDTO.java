@@ -7,6 +7,7 @@ import com.odk.Entity.Salle;
 import com.odk.Entity.TypeActivite;
 import com.odk.Entity.Utilisateur;
 import com.odk.Enum.Statut;
+import java.util.ArrayList;
 import lombok.Data;
 
 import java.util.Date;
@@ -29,7 +30,7 @@ public class ActiviteDTO {
     private String lieu;
     private String description;
     private int objectifParticipation;
-    private List<Etape> etapes;
+    private List<EtapeDTOSansActivite> etapes = new ArrayList<>() ;
     private Entite entite;
     private Salle salleId;
     private Utilisateur createdBy;
@@ -48,10 +49,10 @@ public class ActiviteDTO {
         this.lieu = lieu;
         this.description = description;
         this.objectifParticipation = objectifParticipation;
-        this.entite = entite;
+        this.entite = entite;        
         this.salleId = salleId;
         this.createdBy=createdBy;
-           this.typeActivite = typeActivite;
+        this.typeActivite = typeActivite;
 //       
     }
      public ActiviteDTO(Long id, List<ActiviteValidationDTO> activitevalidation, String nom, Date dateDebut, Date dateFin, Statut statut, String lieu, String description, int objectifParticipation, Entite entite, Salle salleId,Utilisateur createdBy, TypeActivite typeActivite) {
