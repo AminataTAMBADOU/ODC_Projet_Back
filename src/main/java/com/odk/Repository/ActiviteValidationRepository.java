@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -22,4 +23,7 @@ public interface ActiviteValidationRepository extends JpaRepository<ActiviteVali
     @Query("SELECT a.id FROM ActiviteValidation a")
     List<Long> findAllQuery();
     List<ActiviteValidation> findAll();
+    @Query("SELECT a FROM ActiviteValidation a WHERE a.activite.id=:activite")
+    List<ActiviteValidation> findByActiviteId(@Param("activite")Long activite);
+//    List<ActiviteValidation> findByActiviteById(Long activite);
 }

@@ -23,6 +23,7 @@ public class Etape {
     private String nom;
     @ManyToOne
     @JoinColumn(name = "activite_id")
+    @JsonBackReference
     private Activite activite;
     
     @JsonIgnore

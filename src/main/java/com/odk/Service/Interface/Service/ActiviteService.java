@@ -85,7 +85,7 @@ public class ActiviteService implements CrudService<Activite, Long> {
             entity.mettreAJourStatut();
             // Enregistrer l'activité
             Activite activiteCree = activiteRepository.save(entity);
-
+            //envoi de mail de notification
             envoiMail(activiteCree);
 
             return activiteCree;
@@ -108,10 +108,9 @@ public void envoiMail(Activite activiteCree){
     Date dateFin = activiteCree.getDateFin();
     SimpleDateFormat form= new SimpleDateFormat("dd/MM/yyyy");    
     String date1=form.format(dateDebut);
-     String date2=form.format(dateFin);
-     Salle s=salleRepository.findById(activiteCree.getSalleId().getId()).get();
-    
-     String salle=s.getNom();
+    String date2=form.format(dateFin);
+    Salle s=salleRepository.findById(activiteCree.getSalleId().getId()).get();    
+    String salle=s.getNom();
     System.err.println("la salle mail====="+ salle);
             List<Utilisateur> utilisateurs = utilisateurService.List(); // Assurez-vous d'avoir cette méthode
 

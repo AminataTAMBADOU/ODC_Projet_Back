@@ -48,6 +48,7 @@ public class Activite {
     private TypeActivite typeActivite;
 
     @OneToMany(mappedBy = "activite", cascade = CascadeType.MERGE)
+    @JsonManagedReference
     private List<Etape> etapes = new ArrayList<>();
     @ManyToOne
     @JoinColumn(name = "created_by")

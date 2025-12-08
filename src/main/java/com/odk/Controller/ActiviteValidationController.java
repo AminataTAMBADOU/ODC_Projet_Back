@@ -70,25 +70,24 @@ public class ActiviteValidationController {
     }
     // Créer une validation avec fichier
     
-    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/create/{createOrreponse}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     //@PreAuthorize("hasRole('PERSONNEL') or hasRole('SUPERADMIN')")
     public ResponseEntity<?> createValidation(
             @RequestPart("validation") String validationJson,
-            @RequestPart(value = "fichier", required = false) MultipartFile fichier) {
+            @RequestPart(value = "fichier", required = false) MultipartFile fichier,@PathVariable String createOrreponse) {
 
-        try {        
+        try {      
+            System.out.println("reponse ou create========="+createOrreponse);
             // Convertir la chaîne JSON reçue en DTO
             ActiviteValidationDTO dto = objectMapper.readValue(validationJson, ActiviteValidationDTO.class);
                dto.setDate(new Date()); 
                dto.setIsRead(false);
                // envoir de mail pour la validation 
                ActiviteValidationDTO actSave=activiteValidationService.ajouterValidation(dto, fichier);
-               System.out.println("ACTIVALIDATION DTO+++++++++"+actSave);
-               String titre1="Assignation";
-               String titre2="Reponse à la validation";
-               envoiMailValidation(actSave,titre1,titre2);
-            return ResponseEntity.ok(activiteValidationService.ajouterValidation(dto, fichier));
-
+               System.out.println("ACTIVALIDATION DTO+++++++++"+actSave);               
+               envoiMailValidation(actSave,createOrreponse);
+//            return ResponseEntity.ok(activiteValidationService.ajouterValidation(dto, fichier));
+            return ResponseEntity.ok(actSave);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError()
@@ -96,8 +95,25 @@ public class ActiviteValidationController {
         }
     }
 
-    public void envoiMailValidation(ActiviteValidationDTO activiteCree,String t1,String t2){
-     // Récupérer la liste des utilisateurs
+    public void envoiMailValidation(ActiviteValidationDTO activiteCree,String t1){
+//recuperer l'envoyeur de la dernière validation pour activite encours
+List<ActiviteValidation> listvalidationbyActivite=activiteValidationRepository.findByActiviteId(activiteCree.getActiviteId());
+int taille=listvalidationbyActivite.size();
+Long idEnvoyeur = null;
+System.out.println("mes validation==="+listvalidationbyActivite);
+if(taille!=0){
+    idEnvoyeur =listvalidationbyActivite.get(taille-1).getEnvoyeurId();
+}
+
+
+// Récupérer la liste des utilisateurs
+     String titre="Bonjour";
+     if(t1.equalsIgnoreCase("DESIGNATION")){
+         titre="Une nouvelle activité vient d’être enregistrée dans notre système. Vous avez été désigné(e) comme superviseur de celle-ci.";
+     }else{
+        titre="Vous avez eu une reponse à votre VALIDATION enregistrée dans notre système.";
+  
+     }     
     Date dateCreation = activiteCree.getDate();        
     Date dateDebut = activiteRepository.findById(activiteCree.getActiviteId()).get().getDateDebut();
     Date dateFin = activiteRepository.findById(activiteCree.getActiviteId()).get().getDateFin();
@@ -122,7 +138,9 @@ public class ActiviteValidationController {
                     emailvalidation.add(mail);
                 }
             }
-            
+            if(idEnvoyeur!=null && activiteCree.getSuperviseurId()!=idEnvoyeur && !t1.equalsIgnoreCase("DESIGNATION")){
+            emailvalidation.add(utilisateurService.findById(idEnvoyeur).get().getEmail());
+}
             // Construire le corps de l'email avec HTML pour une meilleure présentation
             StringBuilder emailBodyBuilder = new StringBuilder();
             emailBodyBuilder.append("<!DOCTYPE html>");
@@ -130,13 +148,17 @@ public class ActiviteValidationController {
             emailBodyBuilder.append("<head>");
             emailBodyBuilder.append("<meta charset=\"UTF-8\">");
             emailBodyBuilder.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">");
-            emailBodyBuilder.append("<title>Nouvelle Activité Créée dont vous etes designés comme SUPERVISEUR</title>");
+            emailBodyBuilder.append("<title>").append(titre).append("</title>");
             emailBodyBuilder.append("<style>");
-            emailBodyBuilder.append("  body { font-family: Arial, sans-serif; background-color: #f39c12; margin: 0; padding: 20px; }");
-            emailBodyBuilder.append("  .container { background-color: #ffffff; padding: 20px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }");
-            emailBodyBuilder.append("  .header { text-align: center; padding-bottom: 20px; }");
-            emailBodyBuilder.append("  .content { line-height: 1.6; }");
-            emailBodyBuilder.append("  .footer { margin-top: 20px; font-size: 0.9em; color: #555555; text-align: center; }");
+            emailBodyBuilder.append("  body { font-family: Arial, sans-serif;background-color: #F5F5F5;margin: 0;padding: 40px; }");
+            emailBodyBuilder.append(" .container { background-color: #FFFFFF;max-width: 650px;margin: auto;padding: 32px;border-radius: 4px;border-left: 6px solid #FF7900;box-shadow: 0 2px 10px rgba(0,0,0,0.07);");
+            emailBodyBuilder.append(" .header {  text-align: left; margin-bottom: 25px;border-bottom: 2px solid #FF7900;padding-bottom: 12px; }");
+            emailBodyBuilder.append(" .header h2 { margin: 0;color: #000000;font-size: 20px;font-weight: 700;}");
+            emailBodyBuilder.append(" .content {color: #333333; font-size: 15px; line-height: 1.7; margin-top: 15px; }");
+            emailBodyBuilder.append(" .highlight {color: #FF7900;font-weight: bold;}");
+            emailBodyBuilder.append(".cta {margin-top:30px}");
+//            emailBodyBuilder.append(".cta a {}");
+            emailBodyBuilder.append("  .footer { margin-top: 32px; font-size: 0.9em; color: #5A5A5A; text-align: center; }");
             emailBodyBuilder.append("</style>");
             emailBodyBuilder.append("</head>");
             emailBodyBuilder.append("<body>");

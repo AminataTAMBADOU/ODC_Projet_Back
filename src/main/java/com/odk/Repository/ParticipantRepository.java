@@ -83,11 +83,12 @@ List<Participant> findParCritereCustom(
       AND (:entiteId IS NULL OR p.activite.entite.id = :entiteId)
       AND (:dateDebut IS NULL OR p.activite.dateDebut >= :dateDebut)
       AND (:dateFin IS NULL OR p.activite.dateFin <= :dateFin)
+       AND (:etapeId IS NULL OR p.liste.etape.id <= :etapeId)
 """)
 List<Participant>searcDynamic(@Param("dateDebut") LocalDate dateDebut,
         @Param("dateFin") LocalDate dateFin,
         @Param("activiteId") Long activiteId,
-        @Param("entiteId") Long entiteId);
+        @Param("entiteId") Long entiteId,@Param("etapeId") Long etapeId);
 
 //    List<Participant> findByEtapeDebut(Long etapeDebutId);
 //    List<Participant> findByEtapeResultat(Long etapeResultatId);

@@ -30,6 +30,8 @@ public class Utilisateur implements UserDetails {
     private String phone;
     private String password;
     private String genre;
+    @Column(nullable = false)
+    private boolean etat=true;
 
     public Utilisateur(Long id) {
         this.id = id;
@@ -59,7 +61,6 @@ public class Utilisateur implements UserDetails {
 
     @Override
     public String getUsername() {
-
         return email;
     }
 

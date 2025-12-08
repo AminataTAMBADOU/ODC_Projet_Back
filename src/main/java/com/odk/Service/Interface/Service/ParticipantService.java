@@ -78,7 +78,7 @@ public class ParticipantService implements CrudService<Participant, Long> {
         return participantRepository.findById(id);
     }
 
-    public List<Participant> findByCritere(LocalDate dateDebut, LocalDate dateFin,Long activiteId,Long entiteId) {
+    public List<Participant> findByCritere(LocalDate dateDebut, LocalDate dateFin,Long activiteId,Long entiteId,Long etapeId) {
 //       if(entiteId!=0 || entiteId!=null){
 //           System.out.println("CRITERE ENTITE++++"+entiteId);
 //           return participantRepository.findParCritereCustom1(entiteId);
@@ -92,7 +92,7 @@ public class ParticipantService implements CrudService<Participant, Long> {
 //                return participantRepository.findParCritereCustom3(dateDebut,activiteId,entiteId);
 //
 //               }
-            return participantRepository.searcDynamic(dateDebut,dateFin,activiteId,entiteId);
+            return participantRepository.searcDynamic(dateDebut,dateFin,activiteId,entiteId,etapeId);
  
            
        

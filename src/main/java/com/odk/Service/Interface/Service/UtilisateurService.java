@@ -155,7 +155,7 @@ public class UtilisateurService implements UserDetailsService, CrudService<Utili
           roleRepository.findById(userdto.getRole().getId()).ifPresent(user::setRole);
           entiteOdcRepository.findById(userdto.getEntite().getId()).ifPresent(user::setEntite);
               Utilisateur usersaved=utilisateurRepository.save(user);
-              UtilisateurDTO dtosaved=new UtilisateurDTO(usersaved.getId(),  usersaved.getNom(), usersaved.getPrenom(), usersaved.getEmail(), usersaved.getGenre(),usersaved.getPassword(), usersaved.getPhone(), usersaved.getRole(), usersaved.getEntite());
+              UtilisateurDTO dtosaved=new UtilisateurDTO(usersaved.getId(),  usersaved.getNom(), usersaved.getPrenom(), usersaved.getEmail(), usersaved.getGenre(),usersaved.getPassword(),"", usersaved.getPhone(), usersaved.getRole(), usersaved.getEntite(),true);
          return dtosaved;      
         }
     
@@ -181,9 +181,10 @@ public class UtilisateurService implements UserDetailsService, CrudService<Utili
                 utilisateur.getEmail(),
                 utilisateur.getPhone(),
                 utilisateur.getGenre(),
-                 utilisateur.getPassword(),
+                utilisateur.getPassword(),
+                "",
                 utilisateur.getRole(),
-                (Entite) utilisateur.getEntite()
+                (Entite) utilisateur.getEntite(),true
                
         );
     }
@@ -223,30 +224,38 @@ public class UtilisateurService implements UserDetailsService, CrudService<Utili
     
     
     public Utilisateur updateDTO(UtilisateurDTO utilisateur, Long id) {
+        System.out.println("mon userDTO++++++++++"+utilisateur);
         return utilisateurRepository.findById(id).map(
                 p -> {
                     p.setNom(utilisateur.getNom());
                     p.setEmail(utilisateur.getEmail());
                     p.setPrenom(utilisateur.getPrenom());
                     p.setPhone(utilisateur.getPhone());
-                    p.setGenre(utilisateur.getGenre());
+                    if(utilisateur.getGenre()!=null){
+                     p.setGenre(utilisateur.getGenre());
+                }
+                  
 
                     // Vérifiez si le rôle est null avant de le définir
-                     roleRepository.findById(utilisateur.getRole().getId()).ifPresent(p::setRole);
-                     entiteOdcRepository.findById(utilisateur.getEntite().getId()).ifPresent(p::setEntite);
-//                    if (utilisateur.getRole()!= null) {
-//                        p.setRole(utilisateur.getRole());
-//                    }
+//                     roleRepository.findById(utilisateur.getRole().getId()).ifPresent(p::setRole);
+                     if(utilisateur.getEntite()!=null){
+                    entiteOdcRepository.findById(utilisateur.getEntite().getId()).ifPresent(p::setEntite);
+
+                }
+                    if (utilisateur.getRole()!= null) {
+                     roleRepository.findByNom(utilisateur.getRole().getNom()).ifPresent(p::setRole);
+                    }
 //
 //                    if (utilisateur.getEntite().getId() != null) {
 //                        p.setEntite(utilisateur.getEntite());
 //                    }
 
                     // Si le mot de passe est modifié, encodez-le
-                    if (utilisateur.getPassword() != null) {
-                        p.setPassword(passwordEncoder.encode(utilisateur.getPassword()));
-                    }
-
+                    if (utilisateur.getPassword() != null && passwordEncoder.matches(utilisateur.getPassword(), p.getPassword()) ) {
+                        p.setPassword(passwordEncoder.encode(utilisateur.getNewpassword()));
+                    }else {
+                    throw new ResponseStatusException(HttpStatus.FOUND,"Mot de passe actuel incorrect");
+}
                     return utilisateurRepository.save(p);
                 }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Votre id n'existe pas"));
     }

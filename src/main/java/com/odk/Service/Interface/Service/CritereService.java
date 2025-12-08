@@ -40,7 +40,7 @@ public class CritereService implements CrudService<Critere, Long> {
             critereUpdate.setPoint(critere.getPoint());
             critereRepository.save(critereUpdate);
         }
-        return null;
+        return critereOptional.get();
     }
 
     @Override

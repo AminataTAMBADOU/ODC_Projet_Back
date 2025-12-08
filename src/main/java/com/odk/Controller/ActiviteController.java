@@ -53,51 +53,9 @@ public class ActiviteController {
     @PreAuthorize("hasRole('PERSONNEL') or hasRole('SUPERADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public List<ActiviteDTO> listerActivite() {
-        System.out.println("activite dto===="+activiteMapper.listeActivite(activiteService.List()));
+//        System.out.println("activite dto===="+activiteMapper.listeActivite(activiteService.List()));
         return activiteMapper.listeActivite(activiteService.List());
-//        return activiteService.List().stream()
-//                .map(activite -> {
-//                    System.out.println("activite: ************" + activite.getNom());
-//                    List<Etape> etapes = (List<Etape>) activite.getEtapes();
-////                    List<ParticipantDTO> listeDebutDTO = new ArrayList<>();
-////                    List<ParticipantDTO> listeResultatDTO = new ArrayList<>();
-//
-//                    if (etapes != null) {
-//                        for (Etape etape : etapes) {
-//                             System.out.println("Etap***"+etape.getNom());
-//                            // Récupération de listeDebut
-////                            listeDebutDTO.addAll(etape.getListeDebut().stream()
-////                                    .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
-////                                    .collect(Collectors.toList()));
-//
-//                            // Récupération de listeResultat
-////                            listeResultatDTO.addAll(etape.getListeResultat().stream()
-////                                    .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
-////                                    .collect(Collectors.toList()));
-//
-//                            // Log de débogage
-////                            System.out.println("Étape: " + etape.getNom() + " Liste Résultat: " + listeResultatDTO);
-//                        }
-//                    }
-//
-//                    return new ActiviteDTO(
-//                            activite.getId(),
-//                            activite.getNom(),
-//                            activite.getTitre(),
-//                            activite.getDateDebut(),
-//                            activite.getDateFin(),
-//                            activite.getStatut(),
-//                            activite.getLieu(),
-//                            activite.getDescription(),
-//                            activite.getObjectifParticipation(),
-//                            activite.getEntite(),
-//                            etapeMapper.listeEtape(etapes),
-//                            activite.getSalleId(),
-//                            activite.getCreatedBy(),
-//                            activite.getTypeActivite()
-//                    );
-//                })
-//                .collect(Collectors.toList());
+
     }
 
     @GetMapping("/{id}")
@@ -132,10 +90,8 @@ public class ActiviteController {
     @PreAuthorize("hasRole('PERSONNEL')")
     public ResponseEntity<Map<String, String>> deleteActivite(@PathVariable Long id) {
         activiteService.delete(id);
-
         Map<String, String> response = new HashMap<>();
         response.put("message", "Activité supprimée avec succès");
-
         return ResponseEntity.ok(response);
     }
    /* public void deleteActivite(@PathVariable Long id) {
@@ -150,20 +106,14 @@ public class ActiviteController {
                 .map(activite -> {
                     System.out.println("Traitement de l'activité: " + activite.getNom());
 
-//                    List<ParticipantDTO> listeDebutDTO = new ArrayList<>();
-//                    List<ParticipantDTO> listeResultatDTO = new ArrayList<>();
+                    List<ParticipantDTO> listeResultatDTO = new ArrayList<>();
 
                     // Filtrer les étapes en cours et remplir les listes de participants uniquement si l'étape est en cours
                     boolean hasEtapeEnCours = activite.getEtapes().stream()
                             .filter(etape -> Statut.En_Cours.equals(etape.getStatut()))
                             .peek(etape -> {
                                 System.out.println("Étape valide en cours trouvée : " + etape.getNom());
-//                                listeDebutDTO.addAll(etape.getListeDebut().stream()
-//                                        .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
-//                                        .toList());
-//                                listeResultatDTO.addAll(etape.getListeResultat().stream()
-//                                        .map(participant -> new ParticipantDTO(participant.getId(), participant.getNom()))
-//                                        .toList());
+
                             })
                             .findAny()
                             .isPresent();

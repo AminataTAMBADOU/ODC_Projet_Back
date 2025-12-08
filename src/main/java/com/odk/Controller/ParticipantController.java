@@ -68,13 +68,13 @@ public class ParticipantController {
     @GetMapping("/critere")
     @PreAuthorize("hasRole('PERSONNEL')or hasRole('SUPERADMIN')")
     @ResponseStatus(HttpStatus.OK)
-    public List<Participant> getParticipantParCriteres(@RequestParam(required = false) LocalDate dateDebut,@RequestParam(required = false) LocalDate dateFin,@RequestParam(required = false) Long activiteId,@RequestParam(required = false) Long entiteId){
+    public List<Participant> getParticipantParCriteres(@RequestParam(required = false) LocalDate dateDebut,@RequestParam(required = false) LocalDate dateFin,@RequestParam(required = false) Long activiteId,@RequestParam(required = false) Long entiteId,@RequestParam(required=false) Long etapeId){
         System.out.println("find by critere======"+dateDebut+"  ,"+dateFin+", "+activiteId+",  "+entiteId);
 //        Pourque la requette puisse correspondre
         if (dateFin != null) {
         dateFin = dateFin.plusDays(1);
         }
-        return participantService.findByCritere(dateDebut,dateFin,activiteId,entiteId);
+        return participantService.findByCritere(dateDebut,dateFin,activiteId,entiteId,etapeId);
     }
     
     

@@ -53,7 +53,7 @@ public class UtilisateurController {
     }
 
     @PatchMapping("{id}")
-    @PreAuthorize("hasRole('SUPERADMIN')")
+    @PreAuthorize("hasRole('SUPERADMIN')or hasRole('PERSONNEL')")
     @ResponseStatus(HttpStatus.CREATED)
     public Utilisateur Modifier(@PathVariable Long id, @RequestBody UtilisateurDTO utilisateur ){
         return utilisateurService.updateDTO(utilisateur,id);
