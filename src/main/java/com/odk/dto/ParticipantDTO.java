@@ -1,10 +1,7 @@
 package com.odk.dto;
 
-import com.odk.Entity.Liste;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 
 @Data
@@ -20,7 +17,7 @@ public class ParticipantDTO {
 //    private Long activite; // Ajoutez le nom de l'activité
     private boolean checkedIn;
     private LocalDateTime checkInTime;
-//     private Liste liste;
+//    private ListeDTO liste;
      private Long liste;
      
 

@@ -31,7 +31,7 @@ public class Utilisateur implements UserDetails {
     private String password;
     private String genre;
     @Column(nullable = false)
-    private boolean etat=true;
+    private Boolean etat;
 
     public Utilisateur(Long id) {
         this.id = id;

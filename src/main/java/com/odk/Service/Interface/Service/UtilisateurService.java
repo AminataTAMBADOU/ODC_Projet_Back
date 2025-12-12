@@ -45,8 +45,7 @@ public class UtilisateurService implements UserDetailsService, CrudService<Utili
     }
 
     @Override
-    public Utilisateur add(Utilisateur utilisateur) {
-        
+    public Utilisateur add(Utilisateur utilisateur) {        
         System.out.println("NOM========="+utilisateur.getNom());
         System.out.println("ENTITE========="+utilisateur.getEntite().getNom());
         System.out.println("rolE========="+utilisateur.getRole().getNom());
@@ -77,6 +76,7 @@ public class UtilisateurService implements UserDetailsService, CrudService<Utili
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Le rôle " + utilisateur.getRole().getId() + " n'existe pas"));
 
         utilisateur.setRole(role);
+        utilisateur.setEtat(true);
         Utilisateur savedUtilisateur = utilisateurRepository.save(utilisateur);
 
 
@@ -151,7 +151,8 @@ public class UtilisateurService implements UserDetailsService, CrudService<Utili
           user.setGenre(userdto.getGenre());
           user.setPassword(encodedPassword);
           user.setPhone(userdto.getPhone());
-          user.setEntite(userdto.getEntite());          
+          user.setEntite(userdto.getEntite()); 
+          user.setEtat(true);
           roleRepository.findById(userdto.getRole().getId()).ifPresent(user::setRole);
           entiteOdcRepository.findById(userdto.getEntite().getId()).ifPresent(user::setEntite);
               Utilisateur usersaved=utilisateurRepository.save(user);
@@ -164,7 +165,8 @@ public class UtilisateurService implements UserDetailsService, CrudService<Utili
     
     @Override
     public List<Utilisateur> List() {
-        return utilisateurRepository.findAll();
+//        return utilisateurRepository.findAll();
+        return utilisateurRepository.findAllByEtat(true);
     }
 
     public List<UtilisateurDTO> getAllUtilisateur() {
@@ -184,7 +186,8 @@ public class UtilisateurService implements UserDetailsService, CrudService<Utili
                 utilisateur.getPassword(),
                 "",
                 utilisateur.getRole(),
-                (Entite) utilisateur.getEntite(),true
+                (Entite) utilisateur.getEntite(),
+                utilisateur.getEtat()
                
         );
     }
@@ -231,9 +234,13 @@ public class UtilisateurService implements UserDetailsService, CrudService<Utili
                     p.setEmail(utilisateur.getEmail());
                     p.setPrenom(utilisateur.getPrenom());
                     p.setPhone(utilisateur.getPhone());
+                    p.setEtat(utilisateur.getEtat());
                     if(utilisateur.getGenre()!=null){
-                     p.setGenre(utilisateur.getGenre());
-                }
+                     p.setGenre(utilisateur.getGenre());                
+                    }
+                    
+                        
+                    
                   
 
                     // Vérifiez si le rôle est null avant de le définir
@@ -253,9 +260,10 @@ public class UtilisateurService implements UserDetailsService, CrudService<Utili
                     // Si le mot de passe est modifié, encodez-le
                     if (utilisateur.getPassword() != null && passwordEncoder.matches(utilisateur.getPassword(), p.getPassword()) ) {
                         p.setPassword(passwordEncoder.encode(utilisateur.getNewpassword()));
-                    }else {
-                    throw new ResponseStatusException(HttpStatus.FOUND,"Mot de passe actuel incorrect");
-}
+                    }
+//                    else {
+//                    throw new ResponseStatusException(HttpStatus.FOUND,"Mot de passe actuel incorrect");
+//}
                     return utilisateurRepository.save(p);
                 }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Votre id n'existe pas"));
     }

@@ -52,7 +52,7 @@ public class ActiviteService implements CrudService<Activite, Long> {
     @Override
     public Activite add(Activite entity) {
         try {
-            System.out.println("ajout type=================="+entity.getTypeActivite().getId());
+//            System.out.println("ajout type=================="+entity.getTypeActivite().getId());
             // Récupérer l'utilisateur connecté
             String email1 = SecurityContextHolder.getContext().getAuthentication().getName();
             Utilisateur utilisateurPerso = utilisateurRepository.findByEmail(email1)
@@ -111,7 +111,7 @@ public void envoiMail(Activite activiteCree){
     String date2=form.format(dateFin);
     Salle s=salleRepository.findById(activiteCree.getSalleId().getId()).get();    
     String salle=s.getNom();
-    System.err.println("la salle mail====="+ salle);
+//    System.err.println("la salle mail====="+ salle);
             List<Utilisateur> utilisateurs = utilisateurService.List(); // Assurez-vous d'avoir cette méthode
 
              //  Filtrer les utilisateurs ayant le rôle "personnel"

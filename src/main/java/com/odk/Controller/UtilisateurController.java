@@ -3,10 +3,7 @@ package com.odk.Controller;
 import com.odk.Entity.Utilisateur;
 import com.odk.Repository.UtilisateurRepository;
 import com.odk.Service.Interface.Service.UtilisateurService;
-import com.odk.dto.ChangePasswordDTO;
 import com.odk.dto.UtilisateurDTO;
-import com.odk.execption.IncorrectPasswordException;
-import com.odk.execption.UtilisateurNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -41,7 +38,6 @@ public class UtilisateurController {
     @PreAuthorize("hasRole('PERSONNEL') or hasRole('SUPERADMIN')")
     @ResponseStatus(HttpStatus.OK)
     public List<UtilisateurDTO> Liste(){
-
         return utilisateurService.getAllUtilisateur();
     }
 

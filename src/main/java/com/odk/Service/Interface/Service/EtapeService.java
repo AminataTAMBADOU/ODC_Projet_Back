@@ -11,7 +11,7 @@ import com.odk.dto.CritereDTO;
 import com.odk.dto.EtapeDTO;
 import com.odk.dto.EtapeDTOSansActivite;
 import com.odk.dto.EtapeMapper;
-import com.odk.dto.ParticipantDTO;
+import com.odk.dto.ImportReponse;
 import com.odk.helper.ExcelHelper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -38,7 +38,8 @@ public class EtapeService implements CrudService<Etape, Long> {
     private ActiviteParticipantRepository activiteParticipantRepository;
     private CritereRepository critereRepository;
     private ListeRepository listeRepository;
-private final EtapeMapper etapeMapper;
+    private final EtapeMapper etapeMapper;
+    private BlackListRepository blackListRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(EtapeService.class);
 
@@ -56,18 +57,7 @@ private final EtapeMapper etapeMapper;
 //        dto.setListeResultat(new ArrayList<>());
         dto.setCreated_by(etape.getCreated_by());
 
-        // Conversion des participants
-//        if (etape.getListeDebut() != null) {
-//            dto.setListeDebut(etape.getListeDebut().stream()
-//                    .map(ParticipantDTO::new)
-//                    .collect(Collectors.toList()));
-//        }
-
-//        if (etape.getListeResultat() != null) {
-//            dto.setListeResultat(etape.getListeResultat().stream()
-//                    .map(ParticipantDTO::new)
-//                    .collect(Collectors.toList()));
-//        }
+        
 
         // Convertir les Critere en CritereDTO si nécessaire
         if (etape.getCritere() != null) {
@@ -204,13 +194,14 @@ private final EtapeMapper etapeMapper;
         // Log de débogage
 //        System.out.println("toListeDebut : " + toListeDebut);
 
-        // Convertir le fichier Excel en une liste de participants
-        List<Participant> participants = ExcelHelper.excelToTutorials(file, activiteRepository, activiteParticipantRepository, participantRepository);
-
-        // Récupérer l'étape par ID
+// Récupérer l'étape par ID
         Etape etape = etapeRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Étape non trouvée avec l'ID : " + id));
 
+        // Convertir le fichier Excel en une liste de participants
+        List<Participant> participants = ExcelHelper.excelToTutorials(etape,file, activiteRepository, activiteParticipantRepository, participantRepository,blackListRepository);
+
+        
 //        // Récupérer la liste associée à cette étape
 //        Liste liste = listeRepository.findById(id)
 //                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Liste non trouvée pour cette étape"));
@@ -259,7 +250,26 @@ private final EtapeMapper etapeMapper;
         etapeRepository.save(etape);
     }
 
+//pour retourner une reponse correcte
+    @Transactional
+    public ImportReponse addParticipantsToEtapeNew(Long id, MultipartFile file, boolean toListeDebut) throws IOException {
+       
+// Récupérer l'étape par ID
+        Etape etape = etapeRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Étape non trouvée avec l'ID : " + id));
 
+        // Convertir le fichier Excel en une liste de participants
+//        List<Participant> participants = ExcelHelper.excelToTutorials(etape,file, activiteRepository, activiteParticipantRepository, participantRepository,blackListRepository);
+        ImportReponse retourimport = ExcelHelper.excelToTutorialsNew(etape,file, activiteRepository, activiteParticipantRepository, participantRepository,blackListRepository,toListeDebut,listeRepository,etapeRepository);
+
+        
+
+        
+        return retourimport ;
+    }
+    
+    
+    
 
     public List<EtapeDTO> getEtapeDTO(Long id) {
         return etapeMapper.INSTANCE.listeEtape(etapeRepository.findEtapeById(id));
@@ -283,10 +293,19 @@ private final EtapeMapper etapeMapper;
 
         return true;
     }
-
+public boolean isEtapeLierActivite(Long etapeId) {
+    Etape e=etapeRepository.findById(etapeId).get();
+//    if(e.getActivite().getId()!=0)
+    return true;
+}
     public void validateEtapeForModification(Long etapeId) {
         if (!isEtapeModifiable(etapeId)) {
             throw new EtapeTermineeException("L'étape est terminée et ne peut plus être modifiée");
+        }
+    }
+     public void validateEtapeForActivite(Long etapeId) {
+        if (!isEtapeLierActivite(etapeId)) {
+            throw new EtapeTermineeException("L'étape n'est pas liée à l'activite indiquée");
         }
     }
 

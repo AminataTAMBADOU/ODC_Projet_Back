@@ -38,7 +38,7 @@ public class ParticipantService implements CrudService<Participant, Long> {
     public Participant add(Participant entity) {
         return null;
     }
-
+//AJOUT DES PARTICIPANTS
     public Participant addP(Participant participant, Long activiteId) {
         if(!UtilService.isValidEmail(participant.getEmail())) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Votre mail est invalide");

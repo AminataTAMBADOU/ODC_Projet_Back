@@ -14,11 +14,15 @@ public interface ParticipantMapper {
 
     // Convert Mission entity to DTO
 //    @Mapping(source = "etapeDebut", target = "etapeDebut", ignore = true)
+//
 //    @Mapping(source = "activite.id",target = "activite")
     @Mapping(source = "liste.id", target = "liste")
     ParticipantDTO PARTICIPANT_DTO(Participant participant);
 
     List<ParticipantDTO> ListParticpant(List<Participant> participants);
+    
+    @Mapping(target ="liste" , ignore = true )
+    Participant ToEntity(ParticipantDTO DTO);
 
     // Convert MissionDTO to entity
     // Etape etapeDTO(EtapeDTO etapeDTO);

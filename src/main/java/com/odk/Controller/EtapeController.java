@@ -8,7 +8,7 @@ import com.odk.Repository.UtilisateurRepository;
 import com.odk.Service.Interface.Service.EtapeService;
 import com.odk.dto.EtapeDTO;
 import com.odk.dto.EtapeDTOSansActivite;
-import com.odk.helper.ExcelHelper;
+import com.odk.dto.ImportReponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/etape")
@@ -75,8 +74,8 @@ public ResponseEntity<EtapeDTO> create(@PathVariable Long id,@RequestBody EtapeD
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<EtapeDTO>> getAllEtapes() {
         List<EtapeDTO> letap=etapeService.getAllEtapes();
-       System.out.println("mes etapes=AVEC ACTIVITE=============="+ letap);
-       System.out.println("mes etapes=SANS ACTIVITE=============="+ getAllEtapesSansActivite());
+//       System.out.println("mes etapes=AVEC ACTIVITE=============="+ letap);
+//       System.out.println("mes etapes=SANS ACTIVITE=============="+ getAllEtapesSansActivite());
         return ResponseEntity.ok(letap); // Utilise le service pour récupérer les étapes sous forme de DTO
     }
     @GetMapping("/sansactivite")
@@ -84,7 +83,7 @@ public ResponseEntity<EtapeDTO> create(@PathVariable Long id,@RequestBody EtapeD
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<EtapeDTOSansActivite>> getAllEtapesSansActivite() {
         List<EtapeDTOSansActivite> letap=etapeService.getAllEtapesSansActivite();
-       System.out.println("mes etapes sans activite==============="+ letap);
+//       System.out.println("mes etapes sans activite==============="+ letap);
         return ResponseEntity.ok(letap); // Utilise le service pour récupérer les étapes sous forme de DTO
     }
 
@@ -137,8 +136,10 @@ public ResponseEntity<EtapeDTO> create(@PathVariable Long id,@RequestBody EtapeD
             etapeService.validateEtapeForModification(id);
 
             // Procéder à l'ajout des participants
-            etapeService.addParticipantsToEtape(id, file, toListeDebut);
-            return ResponseEntity.ok(new ResponseMessage("Participants ajoutés avec succès"));
+//            etapeService.addParticipantsToEtape(id, file, toListeDebut);
+            ImportReponse retourimport= etapeService.addParticipantsToEtapeNew(id, file, toListeDebut);
+       
+           return ResponseEntity.ok(new ResponseMessage(retourimport.getImportes()+"/"+retourimport.getTotal()+" Participants ajoutés avec succès. Avec \" "+retourimport.getListenoirs()+" \" Participant(s) dans la liste noire(Blacklister)"));
 
         } catch (EtapeService.EtapeTermineeException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)

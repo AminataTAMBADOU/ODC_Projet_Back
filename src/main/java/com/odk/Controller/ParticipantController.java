@@ -6,12 +6,10 @@ import com.odk.Entity.ActiviteParticipantKey;
 import com.odk.Entity.Liste;
 import com.odk.Entity.Participant;
 import com.odk.Repository.ActiviteParticipantRepository;
-import com.odk.Repository.BlackListRepository;
 import com.odk.Service.Interface.Service.BlackListService;
 import com.odk.Service.Interface.Service.ListeService;
 import com.odk.Service.Interface.Service.ParticipantService;
 import com.odk.dto.ParticipantDTO;
-import java.sql.Date;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,8 +36,6 @@ public class ParticipantController {
     @PreAuthorize("hasRole('PERSONNEL')")
     @ResponseStatus(HttpStatus.CREATED)
     public Participant ajouter(@RequestBody Participant participant, Activite activite){
-        Liste liste=new Liste();
-//        liste.setEtape(participant);
         Participant savedParticipant = participantService.addP(participant, activite.getId());
         // Créez la clé pour ActiviteParticipant
         ActiviteParticipantKey key = new ActiviteParticipantKey(activite.getId(), savedParticipant.getId());

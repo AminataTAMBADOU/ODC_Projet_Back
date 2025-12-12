@@ -15,6 +15,7 @@ public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> 
 
     @Query("SELECT u FROM Utilisateur u JOIN u.role r WHERE r.nom = 'Personnel'")
     List<Utilisateur> findByRoleNom(String roleName);
+    List<Utilisateur> findAllByEtat(boolean etat);
 
     long count();
 

@@ -3,12 +3,12 @@ package com.odk.dto;
 import com.odk.Entity.Entite;
 import com.odk.Entity.Role;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class UtilisateurDTO {
     private Long id;
     private String nom;
@@ -20,5 +20,5 @@ public class UtilisateurDTO {
     private String newpassword;
     private Role role;
     private Entite entite;
-    private boolean etat;
+    private Boolean etat;
 }

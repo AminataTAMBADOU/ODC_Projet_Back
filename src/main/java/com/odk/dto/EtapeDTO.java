@@ -34,6 +34,7 @@ public class EtapeDTO {
         this.activite=e.getActivite();
         this.created_by=e.getCreated_by();
         this.critere=e.getCritere();
+        this.listes=e.getListes();
         this.dateDebut=e.getDateDebut();
         this.dateFin=e.getDateFin();
         this.nom=e.getNom();

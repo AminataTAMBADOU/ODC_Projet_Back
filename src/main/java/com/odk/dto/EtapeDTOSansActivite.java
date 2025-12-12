@@ -5,7 +5,6 @@
 package com.odk.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.odk.Entity.Activite;
 import com.odk.Entity.Critere;
 import com.odk.Entity.Liste;
 import com.odk.Entity.Utilisateur;
@@ -32,6 +31,7 @@ public class EtapeDTOSansActivite {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date dateFin;   
     private List<Critere> critere;
+    private List<Liste> listes;
     private Utilisateur created_by;
     private Long activiteid;
 }
