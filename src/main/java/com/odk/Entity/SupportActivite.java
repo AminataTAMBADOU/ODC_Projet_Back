@@ -6,6 +6,7 @@ import java.util.List;
 import org.hibernate.annotations.ManyToAny;
 
 import com.odk.Enum.StatutSupport;
+import com.odk.Enum.TypeSupport;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -37,7 +38,9 @@ public class SupportActivite {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nom;
-    private String type;
+    private String typeMime;
+    @Enumerated(EnumType.STRING)
+    private TypeSupport type;
     private String url;
     @Column(name = "taille",nullable = true)
     private Long taille; // <-- la taille des fichiers uploads ...
@@ -62,7 +65,7 @@ public class SupportActivite {
     @JoinColumn(name = "utilisateur_id")
     private Utilisateur utilisateurAutorise;
 
-    @OneToMany(mappedBy = "support", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "support", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
     private List<HistoriqueSupportActivite> historiques;
 
     public void mettreAJourStatut(StatutSupport nouveauStatut, String commentaire) {
