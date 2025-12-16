@@ -4,9 +4,16 @@ package com.odk.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.odk.Entity.SupportActivite;
+import com.odk.Enum.StatutSupport;
 import com.odk.Service.Interface.Service.StatsFichierService;
 import com.odk.dto.StatsFichierDTO;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +42,9 @@ public class StatsFichierController {
         StatsFichierDTO stats = statsService.calculerStats();
         return ResponseEntity.ok(stats);
       }
-    }
+
+
+}
+    
     
 

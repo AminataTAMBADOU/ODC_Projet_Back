@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.odk.Entity.SupportActivite;
+import com.odk.Enum.TypeSupport;
 import com.odk.Repository.SupportActiviteRepository;
 import com.odk.dto.StatsFichierDTO;
 
@@ -40,7 +41,7 @@ public class StatsFichierService {
 
             //type peut aussi etre null -> sécurité
             String type=(support.getType()!=null)
-                        ? support.getType().toLowerCase()
+                        ? support.getType().name()
                         :"";
 
             //Catégorisation par type 
