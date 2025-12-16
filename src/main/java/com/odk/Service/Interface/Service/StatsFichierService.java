@@ -6,8 +6,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.odk.Entity.SupportActivite;
+import com.odk.Enum.TypeSupport;
 import com.odk.Repository.SupportActiviteRepository;
-import com.odk.dto.StatsFichierDTO;
+
+import com.odk.dto.StatsParTypeDTO;
 
 @Service
 public class StatsFichierService {
@@ -22,41 +24,28 @@ public class StatsFichierService {
         this.supportActivteRepository=supportActiviteRepository;
     }
 
-//--------------------Le Calcul des statistiques -----------------------------------//
+//--------------------Le Calcul des taille de fichier -----------------------------------//
 //--------------------------------------------------------------------------------//
-    public StatsFichierDTO calculerStats (){
-        List<SupportActivite> supports=supportActivteRepository.findAll();
+ public StatsParTypeDTO calculerStatsParType() {
+    List<SupportActivite> supports = supportActivteRepository.findAll();
 
-        long tailleTotale=0;
-        long taillePdfDoc=0;
-        long tailleMedia=0;
+    long tailleRapport = 0;
+    long tailleImage = 0;
+    long tailleVideo = 0;
 
-        for(SupportActivite support: supports){
-            // Securiser taille null -> 0
-            Long tailleObj= support.getTaille();
-            long taille = (tailleObj != null)? tailleObj:0;
+    for (SupportActivite support : supports) {
+        long taille = (support.getTaille() != null) ? support.getTaille() : 0;
 
-            tailleTotale+=taille;
-
-            //type peut aussi etre null -> sécurité
-            String type=(support.getType()!=null)
-                        ? support.getType().name()
-                        :"";
-
-            //Catégorisation par type 
-            if(type.contains("pdf")||type.contains("word")||type.contains("doc")||type.contains("xlxs") ||
-               type.contains("xls") || type.contains("ppt")|| type.contains("pptx")){
-
-                taillePdfDoc+=taille;
-
-            } 
-            else if (type.contains("image")||type.contains("video") || type.contains("png") || type.contains("jpg") ||
-                     type.contains("jpeg") || type.contains("mp4") || type.contains("video") || type.contains("mov")||
-                      type.contains("avi")) {
-                
-                        tailleMedia+=taille;
-            }
+        if (support.getType() == TypeSupport.RAPPORT) {
+            tailleRapport += taille;
+        } else if (support.getType() == TypeSupport.IMAGE) {
+            tailleImage += taille;
+        } else if (support.getType() == TypeSupport.VIDEO) {
+            tailleVideo += taille;
         }
-        return new StatsFichierDTO(tailleTotale, taillePdfDoc, tailleMedia);    
     }
+
+    return new StatsParTypeDTO(tailleRapport, tailleImage, tailleVideo);
+}
+
 }

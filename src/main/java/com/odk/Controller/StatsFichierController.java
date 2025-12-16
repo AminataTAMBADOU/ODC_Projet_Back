@@ -4,9 +4,17 @@ package com.odk.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.odk.Entity.SupportActivite;
+import com.odk.Enum.StatutSupport;
 import com.odk.Service.Interface.Service.StatsFichierService;
-import com.odk.dto.StatsFichierDTO;
 
+import com.odk.dto.StatsParTypeDTO;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,12 +37,15 @@ public class StatsFichierController {
 
 //---------------------------Recuperer la taille des fichiers----------------//
 //--------------------------------------------------------------------------//
-    @GetMapping("/fichiers")
-    @PreAuthorize("hasAnyRole('PERSONNEL', 'SUPERADMIN')")
-    public ResponseEntity<StatsFichierDTO> getStatsFichier(){
-        StatsFichierDTO stats = statsService.calculerStats();
-        return ResponseEntity.ok(stats);
-      }
-    }
+   @GetMapping("/fichiers/par-type")
+   @PreAuthorize("hasAnyRole('PERSONNEL', 'SUPERADMIN')")
+public ResponseEntity<StatsParTypeDTO> getStatsParType() {
+    StatsParTypeDTO stats = statsService.calculerStatsParType();
+    return ResponseEntity.ok(stats);
+}
+
+
+}
+    
     
 

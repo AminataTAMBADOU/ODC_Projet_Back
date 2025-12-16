@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,6 +29,7 @@ import com.odk.Repository.SupportActiviteRepository;
 import com.odk.Repository.UtilisateurRepository;
 import com.odk.dto.HistoriqueSupportActiviteDTO;
 import com.odk.dto.SupportActiviteResponseDTO;
+import org.springframework.util.StringUtils;
 
 @Service
 public class SupportActiviteService {
@@ -284,4 +287,40 @@ public class SupportActiviteService {
         dto.setHistoriques(getHistorique(support.getId()));
         return dto;
     }
+
+
+    public List<SupportActivite> rechercherSupports(String nom, LocalDate date, StatutSupport statut) {
+
+        List<SupportActivite> supports = supportActiviteRepository.findAll();
+
+        return supports.stream()
+                .filter(s -> {
+                    // 🔹 Filtre par nom si fourni
+                    if (StringUtils.hasText(nom)) {
+                        return s.getNom() != null &&
+                               s.getNom().toLowerCase().contains(nom.toLowerCase());
+                    }
+                    return true;
+                })
+                .filter(s -> {
+                    // 🔹 Filtre par statut si fourni
+                    if (statut != null) {
+                        return statut.equals(s.getStatut());
+                    }
+                    return true;
+                })
+                .filter(s -> {
+                    // 🔹 Filtre par date si fourni
+                    if (date != null && s.getDateAjout() != null) {
+                        LocalDate dateAjout = s.getDateAjout()
+                                                .toInstant()
+                                                .atZone(ZoneId.systemDefault())
+                                                .toLocalDate();
+                        return date.equals(dateAjout);
+                    }
+                    return true;
+                })
+                .collect(Collectors.toList());
+    }
+
 }

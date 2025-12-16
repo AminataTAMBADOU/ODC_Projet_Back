@@ -11,6 +11,7 @@ import com.odk.dto.HistoriqueSupportActiviteDTO;
 import org.mapstruct.ap.shaded.freemarker.core.ReturnInstruction.Return;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,7 +27,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/supports")
@@ -178,10 +181,25 @@ public ResponseEntity<Resource> doawloadSupport(@PathVariable Long id, Principal
         return ResponseEntity.ok(dto);
     }
 
-    // ---------------- Filtrer par type ----------------
+    // ---------------- Filtrer par type de fichier----------------
     @GetMapping("/type/{type}")
     public ResponseEntity<List<SupportActiviteResponseDTO>> getSupportsByType(@PathVariable TypeSupport type){
         return ResponseEntity.ok(supportService.getSupportsByType(type));
     }
+
+//---------------------------Rechercher un Media par nom, date & Statut----------------//
+//------------------------------------------------------------------------------------// 
+@GetMapping("/recherche")
+public ResponseEntity<List<SupportActiviteResponseDTO>> rechercherSupports(
+        @RequestParam(required = false) String nom,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+        @RequestParam(required = false) StatutSupport statut) {
+
+    List<SupportActivite> supports = supportService.rechercherSupports(nom, date, statut);
+    List<SupportActiviteResponseDTO> dtos = supports.stream()
+            .map(supportService::convertToDTO)
+            .collect(Collectors.toList());
+    return ResponseEntity.ok(dtos);
+} 
    
 }
