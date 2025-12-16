@@ -136,28 +136,33 @@ public ResponseEntity<Resource> doawloadSupport(@PathVariable Long id, Principal
 
         // 🔥 Récuperer le chemin physique securiser du fichier via ton service
             Path filePath = supportService.getFilePath(support);
-
         // 🔥 Récupérer le chemin du fichier
             System.out.println("CHEMIN DU FICHIER = " + filePath.toAbsolutePath());
 
+            Resource resource = new UrlResource(filePath.toUri());
+
        // 🔥 Vérifier que le fichier existe
-            if(!Files.exists(filePath)){
+            if(!resource.exists()){
              throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Fichier introuvable");
             }
 
-      // 🔥 Créer la resource en échappant correctement le Path pour UrlResource
-           URI fileUri = filePath.toUri(); // transforme le Path en URI compatible
-           Resource resource = new UrlResource(fileUri);
-          // Resource resource = new UrlResource(filePath.toUri());
-      // 🔥 Déterminer le type de contenu (MIME type)
-          String contentType= Files.probeContentType(filePath);
-     // 🔥 Retourner le fichier
-       return ResponseEntity.ok()
-              .contentType(MediaType.parseMediaType(contentType))
-              .header(HttpHeaders.CONTENT_DISPOSITION, contentType.startsWith("image")
-              ? "inline; filename=\""+ support.getNom()+"\""
-              : "attachment; fileName=\""+support.getNom()+"\"")
-              .body(resource);
+            String contentType = Files.probeContentType(filePath);
+        
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + filePath.getFileName().toString() + "\"")
+                    .body(resource);
+
+    //   // 🔥 Créer la resource en échappant correctement le Path pour UrlResource
+    //        URI fileUri = filePath.toUri(); // transforme le Path en URI compatible
+    //        Resource resource = new UrlResource(fileUri);
+    //       // Resource resource = new UrlResource(filePath.toUri());
+    //   // 🔥 Déterminer le type de contenu (MIME type)
+    //       String contentType= Files.probeContentType(filePath);
+    //  // 🔥 Retourner le fichier
+
+
 }
 
  // ---------------- Upload nouveau avec validation ----------------

@@ -33,7 +33,8 @@ public class SupportActiviteService {
 
   
 
-    private final String uploadDir = "C:/Users/sodia.diallo/desktop/ODC_Projet_Back/uploads/supports";
+    // private final String uploadDir = "C:/Users/sodia.diallo/desktop/ODC_Projet_Back/uploads/supports";
+    private final String uploadDir = "uploads/supports";
 
     @Autowired
     private SupportActiviteRepository supportActiviteRepository;
@@ -257,7 +258,9 @@ public class SupportActiviteService {
 // Retourne le chemin exact du fichier...
 
    public Path getFilePath(SupportActivite support){
-    String fileName= support.getUrl().substring(support.getUrl().lastIndexOf("/")+1);
+    // String fileName= support.getUrl().substring(support.getUrl().lastIndexOf("/")+1);
+    String fileName= support.getUrl();//.substring(support.getUrl());
+    System.out.println("---> ----> "+fileName);
     return Paths.get(uploadDir).resolve(fileName).toAbsolutePath().normalize();
     
    }

@@ -40,7 +40,7 @@ public class StatsFichierService {
 
             //type peut aussi etre null -> sécurité
             String type=(support.getType()!=null)
-                        ? support.getType().toLowerCase()
+                        ? support.getType().name()
                         :"";
 
             //Catégorisation par type 
